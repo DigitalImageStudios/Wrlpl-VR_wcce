@@ -3,9 +3,10 @@
 
 #include "OculusXRHMD_FoveatedRendering.h"
 
-#if !UE_VERSION_OLDER_THAN(5, 3, 0)
-#include "RenderGraphBuilder.h"
 #include "HeadMountedDisplayTypes.h" // For the LogHMD log category
+#include "RenderGraphBuilder.h"
+#include "SceneView.h"
+#include "StereoRendering.h"
 
 FOculusXRFoveatedRenderingImageGenerator::FOculusXRFoveatedRenderingImageGenerator(const FXRSwapChainPtr& Swapchain)
 	: FoveationSwapchain(Swapchain)
@@ -18,7 +19,17 @@ FOculusXRFoveatedRenderingImageGenerator::~FOculusXRFoveatedRenderingImageGenera
 	GVRSImageManager.UnregisterExternalImageGenerator(this);
 }
 
-FRDGTextureRef FOculusXRFoveatedRenderingImageGenerator::GetImage(FRDGBuilder& GraphBuilder, const FViewInfo& ViewInfo, FVariableRateShadingImageManager::EVRSImageType ImageType)
+#if !UE_VERSION_OLDER_THAN(5, 4, 0)
+FRDGTextureRef FOculusXRFoveatedRenderingImageGenerator::GetImage(
+	FRDGBuilder& GraphBuilder,
+	const FViewInfo& ViewInfo,
+	FVariableRateShadingImageManager::EVRSImageType ImageType, bool bGetSoftwareImage)
+#else
+FRDGTextureRef FOculusXRFoveatedRenderingImageGenerator::GetImage(
+	FRDGBuilder& GraphBuilder,
+	const FViewInfo& ViewInfo,
+	FVariableRateShadingImageManager::EVRSImageType ImageType)
+#endif
 {
 	if (!FoveationSwapchain.IsValid())
 	{
@@ -36,18 +47,28 @@ FRDGTextureRef FOculusXRFoveatedRenderingImageGenerator::GetImage(FRDGBuilder& G
 	return nullptr;
 }
 
-void FOculusXRFoveatedRenderingImageGenerator::PrepareImages(FRDGBuilder& GraphBuilder, const FSceneViewFamily& ViewFamily, const FMinimalSceneTextures& SceneTextures)
-{
-	return;
-}
-
+#if !UE_VERSION_OLDER_THAN(5, 4, 0)
+bool FOculusXRFoveatedRenderingImageGenerator::IsSupportedByView(const FSceneView& View) const
+#else
 bool FOculusXRFoveatedRenderingImageGenerator::IsEnabledForView(const FSceneView& View) const
+#endif
 {
 	return View.StereoPass != EStereoscopicPass::eSSP_FULL;
 }
 
-FRDGTextureRef FOculusXRFoveatedRenderingImageGenerator::GetDebugImage(FRDGBuilder& GraphBuilder, const FViewInfo& ViewInfo, FVariableRateShadingImageManager::EVRSImageType ImageType)
+#if !UE_VERSION_OLDER_THAN(5, 4, 0)
+FRDGTextureRef FOculusXRFoveatedRenderingImageGenerator::GetDebugImage(
+	FRDGBuilder& GraphBuilder,
+	const FViewInfo& ViewInfo,
+	FVariableRateShadingImageManager::EVRSImageType ImageType,
+	bool bGetSoftwareImage)
+
+#else
+FRDGTextureRef FOculusXRFoveatedRenderingImageGenerator::GetDebugImage(
+	FRDGBuilder& GraphBuilder,
+	const FViewInfo& ViewInfo,
+	FVariableRateShadingImageManager::EVRSImageType ImageType)
+#endif
 {
 	return nullptr;
 }
-#endif // !UE_VERSION_OLDER_THAN(5, 3, 0)

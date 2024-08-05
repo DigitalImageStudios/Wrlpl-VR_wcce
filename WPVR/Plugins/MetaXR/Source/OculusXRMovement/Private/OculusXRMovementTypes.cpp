@@ -21,11 +21,31 @@ FOculusXRBodyState::FOculusXRBodyState()
 	Joints.SetNum(static_cast<int32>(EOculusXRBoneID::COUNT));
 }
 
+FOculusXRBodySkeletonBone::FOculusXRBodySkeletonBone()
+	: Orientation(FRotator::ZeroRotator)
+	, Position(FVector::ZeroVector)
+	, BoneId(EOculusXRBoneID::None)
+	, ParentBoneIndex(EOculusXRBoneID::None)
+{
+}
+
+FOculusXRBodySkeleton::FOculusXRBodySkeleton()
+	: NumBones(0)
+{
+	Bones.SetNum(static_cast<int32>(EOculusXRBoneID::COUNT));
+}
+
+FOculusXRBodySkeletonState::FOculusXRBodySkeletonState()
+	: BodyState()
+	, SkeletonState()
+{
+}
 
 FOculusXRFaceState::FOculusXRFaceState()
 	: bIsValid(false)
 	, bIsEyeFollowingBlendshapesValid(false)
 	, Time(0.f)
+	, DataSource()
 {
 	ExpressionWeights.SetNum(static_cast<int32>(EOculusXRFaceExpression::COUNT));
 	ExpressionWeightConfidences.SetNum(static_cast<int32>(EOculusXRFaceConfidence::COUNT));

@@ -96,6 +96,7 @@ public:
 
 	// FMetaXRSES
 	OCULUSXRHMD_API static void LaunchEnvironment(FString EnvironmentName);
+	OCULUSXRHMD_API static void LaunchMoreRoomsEnvironment(FString EnvironmentName);
 	OCULUSXRHMD_API static void StopServer();
 
 #if OCULUS_HMD_SUPPORTED_PLATFORMS

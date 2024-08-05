@@ -32,12 +32,12 @@ namespace OculusXRCompatibilityRules
 	public:
 		FUseArm64CPURule()
 			: ISetupRule(
-				"Compatibility_UseArm64CPU",
-				NSLOCTEXT("OculusXRCompatibilityRules", "UseArm64CPU_DisplayName", "Use Arm64 CPU Architecture"),
-				NSLOCTEXT("OculusXRCompatibilityRules", "UseArm64CPU_Description", "Meta Quest store requires 64-bit applications"),
-				ESetupRuleCategory::Compatibility,
-				ESetupRuleSeverity::Critical,
-				MetaQuest_All) {}
+				  "Compatibility_UseArm64CPU",
+				  NSLOCTEXT("OculusXRCompatibilityRules", "UseArm64CPU_DisplayName", "Use Arm64 CPU Architecture"),
+				  NSLOCTEXT("OculusXRCompatibilityRules", "UseArm64CPU_Description", "Meta Quest store requires 64-bit applications"),
+				  ESetupRuleCategory::Compatibility,
+				  ESetupRuleSeverity::Critical,
+				  MetaQuest_All) {}
 		virtual bool IsApplied() const override;
 
 	protected:
@@ -49,12 +49,12 @@ namespace OculusXRCompatibilityRules
 	public:
 		FEnablePackageForMetaQuestRule()
 			: ISetupRule(
-				"Compatibility_UsePackageForMetaQuest",
-				NSLOCTEXT("OculusXRCompatibilityRules", "UsePackageForQuest_DisplayName", "Enable Package for Meta Quest devices"),
-				NSLOCTEXT("OculusXRCompatibilityRules", "UsePackageForQuest_Description", "\"Package for Meta Quest devices\" must be enabled."),
-				ESetupRuleCategory::Compatibility,
-				ESetupRuleSeverity::Critical,
-				MetaQuest_All) {}
+				  "Compatibility_UsePackageForMetaQuest",
+				  NSLOCTEXT("OculusXRCompatibilityRules", "UsePackageForQuest_DisplayName", "Enable Package for Meta Quest devices"),
+				  NSLOCTEXT("OculusXRCompatibilityRules", "UsePackageForQuest_Description", "\"Package for Meta Quest devices\" must be enabled."),
+				  ESetupRuleCategory::Compatibility,
+				  ESetupRuleSeverity::Critical,
+				  MetaQuest_All) {}
 		virtual bool IsApplied() const override;
 
 	protected:
@@ -66,12 +66,12 @@ namespace OculusXRCompatibilityRules
 	public:
 		FQuest2SupportedDeviceRule()
 			: ISetupRule(
-				"Compatibility_UsePackageForQuest2",
-				NSLOCTEXT("OculusXRCompatibilityRules", "UsePackageForQuest_DisplayName", "Use Package for Quest2"),
-				NSLOCTEXT("OculusXRCompatibilityRules", "UsePackageForQuest_Description", "Meta Quest2 must be added to \"Supported Meta Quest Devices\"."),
-				ESetupRuleCategory::Compatibility,
-				ESetupRuleSeverity::Critical,
-				ESetupRulePlatform::MetaQuest_2) {}
+				  "Compatibility_UsePackageForQuest2",
+				  NSLOCTEXT("OculusXRCompatibilityRules", "UsePackageForQuest_DisplayName", "Use Package for Quest2"),
+				  NSLOCTEXT("OculusXRCompatibilityRules", "UsePackageForQuest_Description", "Meta Quest2 must be added to \"Supported Meta Quest Devices\"."),
+				  ESetupRuleCategory::Compatibility,
+				  ESetupRuleSeverity::Critical,
+				  ESetupRulePlatform::MetaQuest_2) {}
 		virtual bool IsApplied() const override;
 
 	protected:
@@ -83,12 +83,12 @@ namespace OculusXRCompatibilityRules
 	public:
 		FQuestProSupportedDeviceRule()
 			: ISetupRule(
-				"Compatibility_UsePackageForQuestPro",
-				NSLOCTEXT("OculusXRCompatibilityRules", "UsePackageForQuest_DisplayName", "Use Package for QuestPro"),
-				NSLOCTEXT("OculusXRCompatibilityRules", "UsePackageForQuest_Description", "Meta QuestPro must be added to \"Supported Meta Quest Devices\"."),
-				ESetupRuleCategory::Compatibility,
-				ESetupRuleSeverity::Critical,
-				ESetupRulePlatform::MetaQuest_Pro) {}
+				  "Compatibility_UsePackageForQuestPro",
+				  NSLOCTEXT("OculusXRCompatibilityRules", "UsePackageForQuest_DisplayName", "Use Package for QuestPro"),
+				  NSLOCTEXT("OculusXRCompatibilityRules", "UsePackageForQuest_Description", "Meta QuestPro must be added to \"Supported Meta Quest Devices\"."),
+				  ESetupRuleCategory::Compatibility,
+				  ESetupRuleSeverity::Critical,
+				  ESetupRulePlatform::MetaQuest_Pro) {}
 		virtual bool IsApplied() const override;
 
 	protected:
@@ -100,12 +100,12 @@ namespace OculusXRCompatibilityRules
 	public:
 		FQuest3SupportedDeviceRule()
 			: ISetupRule(
-				"Compatibility_UsePackageForQuest3",
-				NSLOCTEXT("OculusXRCompatibilityRules", "UsePackageForQuest_DisplayName", "Use Package for Quest3"),
-				NSLOCTEXT("OculusXRCompatibilityRules", "UsePackageForQuest_Description", "Meta Quest3 must be added to \"Supported Meta Quest Devices\"."),
-				ESetupRuleCategory::Compatibility,
-				ESetupRuleSeverity::Critical,
-				ESetupRulePlatform::MetaQuest_3) {}
+				  "Compatibility_UsePackageForQuest3",
+				  NSLOCTEXT("OculusXRCompatibilityRules", "UsePackageForQuest_DisplayName", "Use Package for Quest3"),
+				  NSLOCTEXT("OculusXRCompatibilityRules", "UsePackageForQuest_Description", "Meta Quest3 must be added to \"Supported Meta Quest Devices\"."),
+				  ESetupRuleCategory::Compatibility,
+				  ESetupRuleSeverity::Critical,
+				  ESetupRulePlatform::MetaQuest_3) {}
 		virtual bool IsApplied() const override;
 
 	protected:
@@ -117,12 +117,12 @@ namespace OculusXRCompatibilityRules
 	public:
 		FEnableFullscreenRule()
 			: ISetupRule(
-				"Compatibility_EnableFullscreen",
-				NSLOCTEXT("OculusXRCompatibilityRules", "EnableFullscreen_DisplayName", "Enable Fullscreen"),
-				NSLOCTEXT("OculusXRCompatibilityRules", "EnableFullscreen_Description", "Android fullscreen must be enabled for VR"),
-				ESetupRuleCategory::Compatibility,
-				ESetupRuleSeverity::Warning,
-				MetaQuest_All) {}
+				  "Compatibility_EnableFullscreen",
+				  NSLOCTEXT("OculusXRCompatibilityRules", "EnableFullscreen_DisplayName", "Enable Fullscreen"),
+				  NSLOCTEXT("OculusXRCompatibilityRules", "EnableFullscreen_Description", "Android fullscreen must be enabled for VR"),
+				  ESetupRuleCategory::Compatibility,
+				  ESetupRuleSeverity::Warning,
+				  MetaQuest_All) {}
 		virtual bool IsApplied() const override;
 
 	protected:
@@ -134,11 +134,11 @@ namespace OculusXRCompatibilityRules
 	public:
 		FEnableStartInVRRule()
 			: ISetupRule(
-				"Compatibility_EnableStartInVR",
-				NSLOCTEXT("OculusXRCompatibilityRules", "EnableStartInVR_DisplayName", "Enable Start in VR"),
-				NSLOCTEXT("OculusXRCompatibilityRules", "EnableStartInVR_Description", "Enable the \"Start in VR\" setting to ensure your app starts in VR. (You can also ignore this and pass -vr at the command line"),
-				ESetupRuleCategory::Compatibility,
-				ESetupRuleSeverity::Warning) {}
+				  "Compatibility_EnableStartInVR",
+				  NSLOCTEXT("OculusXRCompatibilityRules", "EnableStartInVR_DisplayName", "Enable Start in VR"),
+				  NSLOCTEXT("OculusXRCompatibilityRules", "EnableStartInVR_Description", "Enable the \"Start in VR\" setting to ensure your app starts in VR. (You can also ignore this and pass -vr at the command line"),
+				  ESetupRuleCategory::Compatibility,
+				  ESetupRuleSeverity::Warning) {}
 		virtual bool IsApplied() const override;
 
 	protected:
@@ -150,11 +150,11 @@ namespace OculusXRCompatibilityRules
 	public:
 		FDisableTouchInterfaceRule()
 			: ISetupRule(
-				"Compatibility_DisableTouchInterface",
-				NSLOCTEXT("OculusXRCompatibilityRules", "DisableTouchInterface_DisplayName", "Disable Touch Interface"),
-				NSLOCTEXT("OculusXRCompatibilityRules", "DisableTouchInterface_Description", "Touch interface will interfere with correct VR input behavior"),
-				ESetupRuleCategory::Compatibility,
-				ESetupRuleSeverity::Critical) {}
+				  "Compatibility_DisableTouchInterface",
+				  NSLOCTEXT("OculusXRCompatibilityRules", "DisableTouchInterface_DisplayName", "Disable Touch Interface"),
+				  NSLOCTEXT("OculusXRCompatibilityRules", "DisableTouchInterface_Description", "Touch interface will interfere with correct VR input behavior"),
+				  ESetupRuleCategory::Compatibility,
+				  ESetupRuleSeverity::Critical) {}
 		virtual bool IsApplied() const override;
 
 	protected:

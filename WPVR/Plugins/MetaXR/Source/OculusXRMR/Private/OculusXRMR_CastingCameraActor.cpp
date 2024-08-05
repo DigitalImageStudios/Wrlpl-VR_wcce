@@ -402,11 +402,11 @@ void AOculusXRMR_CastingCameraActor::Tick(float DeltaTime)
 			SampleRate = AudioDevice->GetSampleRate();
 			AudioBuffers[CaptureIndex] = AudioDevice->StopRecording(nullptr, NumChannels, SampleRate);
 			AudioTimes[CaptureIndex] = AudioDevice->GetAudioTime();
-			//UE_LOG(LogMR, Error, TEXT("SampleRate: %f, NumChannels: %f, Time: %f, Buffer Length: %d, Buffer: %p"), SampleRate, NumChannels, AudioDevice->GetAudioTime(), AudioBuffers[EncodeIndex].Num(), AudioBuffers[EncodeIndex].GetData());
+			// UE_LOG(LogMR, Error, TEXT("SampleRate: %f, NumChannels: %f, Time: %f, Buffer Length: %d, Buffer: %p"), SampleRate, NumChannels, AudioDevice->GetAudioTime(), AudioBuffers[EncodeIndex].Num(), AudioBuffers[EncodeIndex].GetData());
 			AudioDevice->StartRecording(nullptr, 0.1);
 		}
 
-		//PoseTimes[CaptureIndex] = MRState->TrackedCamera.UpdateTime;
+		// PoseTimes[CaptureIndex] = MRState->TrackedCamera.UpdateTime;
 
 		// Increment this counter for the initial cycle through "swapchain"
 		if (RenderedRTs < NumRTs)

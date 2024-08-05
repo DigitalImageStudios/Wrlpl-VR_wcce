@@ -6,6 +6,7 @@
 #include "OculusXRAnchorBPFunctionLibrary.h"
 #include "OculusXRRoomLayoutManager.h"
 #include "OculusXRAnchorDelegates.h"
+#include "OculusXRAnchorsModule.h"
 
 //
 // Create Spatial Anchor
@@ -801,7 +802,7 @@ void UOculusXRAnchorLaunchCaptureFlow::OnCaptureFinish(FOculusXRUInt64 RequestId
 {
 	if (Request != RequestId.GetValue())
 	{
-		UE_LOG(LogOculusXRAnchors, Warning, TEXT("%llu request id doesn't match %llu. Ignoring request."), RequestId, Request);
+		UE_LOG(LogOculusXRAnchors, Warning, TEXT("%llu request id doesn't match %llu. Ignoring request."), RequestId.GetValue(), Request);
 		return;
 	}
 

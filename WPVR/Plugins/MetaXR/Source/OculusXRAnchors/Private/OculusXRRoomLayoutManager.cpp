@@ -21,7 +21,7 @@ namespace OculusXRAnchors
 				unsigned char* bufData = buf.EventData;
 
 				memcpy(&sceneCaptureComplete.requestId, bufData, sizeof(sceneCaptureComplete.requestId));
-				bufData += sizeof(ovrpUInt64); //move forward
+				bufData += sizeof(ovrpUInt64); // move forward
 				memcpy(&sceneCaptureComplete.result, bufData, sizeof(sceneCaptureComplete.result));
 
 				FOculusXRAnchorEventDelegates::OculusSceneCaptureComplete.Broadcast(FOculusXRUInt64(sceneCaptureComplete.requestId), sceneCaptureComplete.result >= 0);

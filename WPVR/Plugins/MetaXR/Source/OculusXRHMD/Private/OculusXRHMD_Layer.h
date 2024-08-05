@@ -230,4 +230,4 @@ namespace OculusXRHMD
 
 } // namespace OculusXRHMD
 
-#endif //OCULUS_HMD_SUPPORTED_PLATFORMS
+#endif // OCULUS_HMD_SUPPORTED_PLATFORMS

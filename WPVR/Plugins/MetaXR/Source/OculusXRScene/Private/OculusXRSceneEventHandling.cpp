@@ -4,8 +4,10 @@
 
 #include "OculusXRHMD.h"
 #include "IOculusXRSceneModule.h"
+#include "OculusXRAnchorBPFunctionLibrary.h"
 #include "OculusXRSceneDelegates.h"
 #include "OculusXRSceneEventDelegates.h"
+#include "OculusXRSceneModule.h"
 
 namespace OculusXRScene
 {
@@ -26,6 +28,38 @@ namespace OculusXRScene
 		switch (buf.EventType)
 		{
 
+			case ovrpEventType_BoundaryVisibilityChanged:
+			{
+				ovrpEventDataBoundaryVisibilityChanged visibilityChangedEvent;
+				GetEventData(buf, visibilityChangedEvent);
+
+				ovrpBoundaryVisibility newVisibility = visibilityChangedEvent.BoundaryVisibility;
+				EOculusXRBoundaryVisibility ueVisibility = EOculusXRBoundaryVisibility::Invalid;
+				switch (newVisibility)
+				{
+					case ovrpBoundaryVisibility_Suppressed:
+						ueVisibility = EOculusXRBoundaryVisibility::Suppressed;
+						break;
+
+					case ovrpBoundaryVisibility_NotSuppressed:
+						ueVisibility = EOculusXRBoundaryVisibility::NotSuppressed;
+						break;
+
+					default:
+						UE_LOG(LogOculusXRScene, Error, TEXT("Unknown ovrp boundary type in BoundaryVisibilityChanged event! Enum value(%d)"), newVisibility);
+				}
+
+				UE_LOG(LogOculusXRScene, Log, TEXT("FOculusXRSceneEventHandling - Boundary visibility changed. Visibility(%s)"), *UEnum::GetValueAsString(ueVisibility));
+
+				FOculusXRSceneEventDelegates::OculusBoundaryVisibilityChanged.Broadcast(ueVisibility);
+				UOculusXRSceneEventDelegates* eventDelegates = GEngine->GetEngineSubsystem<UOculusXRSceneEventDelegates>();
+				if (eventDelegates != nullptr)
+				{
+					eventDelegates->OnBoundaryVisibilityChanged.Broadcast(ueVisibility);
+				}
+
+				break;
+			}
 
 			case ovrpEventType_None:
 			default:

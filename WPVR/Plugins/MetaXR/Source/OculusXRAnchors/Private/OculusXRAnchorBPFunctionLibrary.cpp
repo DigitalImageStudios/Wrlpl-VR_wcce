@@ -1,6 +1,9 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 
 #include "OculusXRAnchorBPFunctionLibrary.h"
+
+#include "Engine/GameEngine.h"
+#include "OculusXRAnchorsModule.h"
 #include "OculusXRHMD.h"
 #include "OculusXRSpatialAnchorComponent.h"
 #include "OculusXRAnchorsPrivate.h"
@@ -156,8 +159,9 @@ bool UOculusXRAnchorBPFunctionLibrary::IsAnchorResultSuccess(EOculusXRAnchorResu
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
 	return OVRP_SUCCESS(result);
-#endif
+#else
 	return false;
+#endif
 }
 
 const UOculusXRBaseAnchorComponent* UOculusXRAnchorBPFunctionLibrary::GetAnchorComponent(const FOculusXRSpaceQueryResult& QueryResult, EOculusXRSpaceComponentType ComponentType, UObject* Outer)

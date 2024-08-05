@@ -123,22 +123,22 @@ public:
 					DynamicMeshBuilder.GetMesh(GetLocalToWorld(), MaterialProxy, SDPG_World, true, false, ViewIndex, Collector);
 
 					// -- Original draw code for reference --
-					//FMeshBatch& Mesh = Collector.AllocateMesh();
-					//FMeshBatchElement& BatchElement = Mesh.Elements[0];
-					//BatchElement.IndexBuffer = &IndexBuffer;
-					//Mesh.bWireframe = bWireframe;
-					//Mesh.VertexFactory = &VertexFactory;
-					//Mesh.MaterialRenderProxy = MaterialProxy;
-					//BatchElement.PrimitiveUniformBuffer = CreatePrimitiveUniformBufferImmediate(GetLocalToWorld(), GetBounds(), GetLocalBounds(), true, DrawsVelocity());
-					//BatchElement.FirstIndex = 0;
-					//BatchElement.NumPrimitives = IndexBuffer.Indices.Num() / 3;
-					//BatchElement.MinVertexIndex = 0;
-					//BatchElement.MaxVertexIndex = VertexBuffer.Vertices.Num() - 1;
-					//Mesh.ReverseCulling = IsLocalToWorldDeterminantNegative();
-					//Mesh.Type = PT_TriangleList;
-					//Mesh.DepthPriorityGroup = SDPG_World;
-					//Mesh.bCanApplyViewModeOverrides = false;
-					//Collector.AddMesh(ViewIndex, Mesh);
+					// FMeshBatch& Mesh = Collector.AllocateMesh();
+					// FMeshBatchElement& BatchElement = Mesh.Elements[0];
+					// BatchElement.IndexBuffer = &IndexBuffer;
+					// Mesh.bWireframe = bWireframe;
+					// Mesh.VertexFactory = &VertexFactory;
+					// Mesh.MaterialRenderProxy = MaterialProxy;
+					// BatchElement.PrimitiveUniformBuffer = CreatePrimitiveUniformBufferImmediate(GetLocalToWorld(), GetBounds(), GetLocalBounds(), true, DrawsVelocity());
+					// BatchElement.FirstIndex = 0;
+					// BatchElement.NumPrimitives = IndexBuffer.Indices.Num() / 3;
+					// BatchElement.MinVertexIndex = 0;
+					// BatchElement.MaxVertexIndex = VertexBuffer.Vertices.Num() - 1;
+					// Mesh.ReverseCulling = IsLocalToWorldDeterminantNegative();
+					// Mesh.Type = PT_TriangleList;
+					// Mesh.DepthPriorityGroup = SDPG_World;
+					// Mesh.bCanApplyViewModeOverrides = false;
+					// Collector.AddMesh(ViewIndex, Mesh);
 				}
 			}
 		}

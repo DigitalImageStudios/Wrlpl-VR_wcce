@@ -21,8 +21,8 @@ public:
 	TSet<FName> IgnoredRules = {};
 
 	/**
-	* @brief Selected platform for development
-	*/
+	 * @brief Selected platform for development
+	 */
 	UPROPERTY(config)
 	uint32 CurrentPlatform = static_cast<uint32>(MetaQuest_All);
 

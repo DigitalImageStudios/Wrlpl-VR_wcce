@@ -4,10 +4,10 @@
 #include "OculusXRHMD_Layer.h"
 
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-//#include "MediaTexture.h"
-//#include "ScreenRendering.h"
-//#include "ScenePrivate.h"
-//#include "PostProcess/SceneFilterRendering.h"
+// #include "MediaTexture.h"
+// #include "ScreenRendering.h"
+// #include "ScenePrivate.h"
+// #include "PostProcess/SceneFilterRendering.h"
 #include "PostProcess/SceneRenderTargets.h"
 #include "HeadMountedDisplayTypes.h" // for LogHMD
 #include "OculusXRHMD.h"
@@ -122,7 +122,7 @@ namespace OculusXRHMD
 		HandlePokeAHoleComponent();
 
 #if !PLATFORM_ANDROID
-		if (!(Desc.HasShape<FReconstructedLayer>() || Desc.HasShape<FUserDefinedLayer>())) //If not Passthrough Shape
+		if (!(Desc.HasShape<FReconstructedLayer>() || Desc.HasShape<FUserDefinedLayer>())) // If not Passthrough Shape
 		{
 			// Mark all layers as supporting depth for now, due to artifacts with ovrpLayerSubmitFlag_NoDepth
 			Desc.Flags |= IStereoLayers::LAYER_FLAG_SUPPORT_DEPTH;
@@ -1272,7 +1272,7 @@ namespace OculusXRHMD
 		else
 		{
 			OvrpLayerSubmit.EyeFov.DepthFar = 0;
-			OvrpLayerSubmit.EyeFov.DepthNear = Frame->NearClippingPlane / 100.f; //physical scale is 100UU/meter
+			OvrpLayerSubmit.EyeFov.DepthNear = Frame->NearClippingPlane / 100.f; // physical scale is 100UU/meter
 			OvrpLayerSubmit.LayerSubmitFlags = ovrpLayerSubmitFlag_ReverseZ;
 			OvrpLayerSubmit.ViewportRect[0] = ToOvrpRecti(Settings->EyeRenderViewport[0]);
 			OvrpLayerSubmit.ViewportRect[1] = ToOvrpRecti(Settings->EyeRenderViewport[1]);
@@ -1481,4 +1481,4 @@ namespace OculusXRHMD
 
 } // namespace OculusXRHMD
 
-#endif //OCULUS_HMD_SUPPORTED_PLATFORMS
+#endif // OCULUS_HMD_SUPPORTED_PLATFORMS

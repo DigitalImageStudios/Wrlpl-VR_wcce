@@ -21,14 +21,14 @@ namespace OculusXRCompatibilityRules
 
 	FUseAndroidSDKMinimumRule::FUseAndroidSDKMinimumRule()
 		: ISetupRule(
-			"Compatibility_UseAndroidSDKMinimum",
-			LOCTEXT("UseAndroidSDKMinimum_DisplayName", "Use Android SDK Minimum Version"),
-			FText::Format(
-				LOCTEXT("UseAndroidSDKMinimum_Description", "Minimum Android API level must be at least {0}."),
-				MinimumAndroidAPILevel),
-			ESetupRuleCategory::Compatibility,
-			ESetupRuleSeverity::Critical,
-			MetaQuest_All) {}
+			  "Compatibility_UseAndroidSDKMinimum",
+			  LOCTEXT("UseAndroidSDKMinimum_DisplayName", "Use Android SDK Minimum Version"),
+			  FText::Format(
+				  LOCTEXT("UseAndroidSDKMinimum_Description", "Minimum Android API level must be at least {0}."),
+				  MinimumAndroidAPILevel),
+			  ESetupRuleCategory::Compatibility,
+			  ESetupRuleSeverity::Critical,
+			  MetaQuest_All) {}
 
 	bool FUseAndroidSDKMinimumRule::IsApplied() const
 	{
@@ -45,14 +45,14 @@ namespace OculusXRCompatibilityRules
 
 	FUseAndroidSDKTargetRule::FUseAndroidSDKTargetRule()
 		: ISetupRule(
-			"Compatibility_UseAndroidSDKTarget",
-			LOCTEXT("UseAndroidSDKTarget_DisplayName", "Use Android SDK Target Version"),
-			FText::Format(
-				LOCTEXT("UseAndroidSDKTarget_Description", "Target Android API level must be at least {0}."),
-				TargetAndroidAPILevel),
-			ESetupRuleCategory::Compatibility,
-			ESetupRuleSeverity::Critical,
-			MetaQuest_All) {}
+			  "Compatibility_UseAndroidSDKTarget",
+			  LOCTEXT("UseAndroidSDKTarget_DisplayName", "Use Android SDK Target Version"),
+			  FText::Format(
+				  LOCTEXT("UseAndroidSDKTarget_Description", "Target Android API level must be at least {0}."),
+				  TargetAndroidAPILevel),
+			  ESetupRuleCategory::Compatibility,
+			  ESetupRuleSeverity::Critical,
+			  MetaQuest_All) {}
 
 	bool FUseAndroidSDKTargetRule::IsApplied() const
 	{

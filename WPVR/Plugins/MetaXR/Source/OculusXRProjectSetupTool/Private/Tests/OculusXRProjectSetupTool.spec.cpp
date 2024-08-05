@@ -25,11 +25,14 @@ TSet<FName> RulesThatRequireRestart = {
 	FName("Rendering_DisableAmbientOcclusion"),
 	FName("Rendering_DisablePostProcessing"),
 	FName("Rendering_EnableForwardShading"),
+	FName("Rendering_EnablePCForwardShading"),
 	FName("Rendering_EnableInstancedStereo"),
 	FName("Rendering_EnableMultiView"),
 	FName("Rendering_EnableStaticLighting"),
 	FName("Rendering_MobileShaderAllowDistanceFieldShadows"),
 	FName("Rendering_MobileShaderAllowMovableDirectionalLights"),
+	FName("Rendering_MobileGPUScene"),
+	FName("Rendering_MobileUniformLocalLights"),
 	FName("Rendering_UseHalfPrecisionFloat")
 };
 

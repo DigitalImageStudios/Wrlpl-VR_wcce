@@ -8,7 +8,7 @@
 #include "OculusXRAnchorComponents.h"
 #include "OculusXRAnchorBPFunctionLibrary.generated.h"
 
-//Helper
+// Helper
 UCLASS()
 class OCULUSXRANCHORS_API UOculusXRAnchorBPFunctionLibrary : public UBlueprintFunctionLibrary
 {

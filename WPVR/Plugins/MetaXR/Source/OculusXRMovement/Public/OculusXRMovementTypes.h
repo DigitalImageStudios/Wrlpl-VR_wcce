@@ -153,6 +153,53 @@ public:
 	TArray<FOculusXRBodyJoint> Joints;
 };
 
+USTRUCT(BlueprintType)
+struct OCULUSXRMOVEMENT_API FOculusXRBodySkeletonBone
+{
+	GENERATED_BODY()
+public:
+	FOculusXRBodySkeletonBone();
+
+	UPROPERTY(BlueprintReadOnly, Category = "OculusXR|Movement")
+	FRotator Orientation;
+
+	UPROPERTY(BlueprintReadOnly, Category = "OculusXR|Movement")
+	FVector Position;
+
+	UPROPERTY(BlueprintReadOnly, Category = "OculusXR|Movement")
+	EOculusXRBoneID BoneId;
+
+	UPROPERTY(BlueprintReadOnly, Category = "OculusXR|Movement")
+	EOculusXRBoneID ParentBoneIndex;
+};
+
+USTRUCT(BlueprintType)
+struct OCULUSXRMOVEMENT_API FOculusXRBodySkeleton
+{
+	GENERATED_BODY()
+public:
+	FOculusXRBodySkeleton();
+
+	UPROPERTY(BlueprintReadOnly, Category = "OculusXR|Movement")
+	int NumBones;
+
+	UPROPERTY(BlueprintReadOnly, Category = "OculusXR|Movement")
+	TArray<FOculusXRBodySkeletonBone> Bones;
+};
+
+USTRUCT(BlueprintType)
+struct OCULUSXRMOVEMENT_API FOculusXRBodySkeletonState
+{
+	GENERATED_BODY()
+public:
+	FOculusXRBodySkeletonState();
+
+	UPROPERTY(BlueprintReadOnly, Category = "OculusXR|Movement")
+	FOculusXRBodyState BodyState;
+
+	UPROPERTY(BlueprintReadOnly, Category = "OculusXR|Movement")
+	FOculusXRBodySkeleton SkeletonState;
+};
 
 UENUM(BlueprintType)
 enum class EFaceTrackingDataSource : uint8

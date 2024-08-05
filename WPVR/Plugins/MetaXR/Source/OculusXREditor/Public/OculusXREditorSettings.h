@@ -16,7 +16,7 @@ enum class EOculusXRPlatform : uint8
 };
 
 /**
- * 
+ *
  */
 UCLASS(config = Editor)
 class OCULUSXREDITOR_API UOculusXREditorSettings : public UObject

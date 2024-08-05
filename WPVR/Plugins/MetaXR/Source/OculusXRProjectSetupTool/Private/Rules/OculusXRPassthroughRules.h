@@ -13,11 +13,11 @@ namespace OculusXRPassthroughRules
 	public:
 		FEnablePassthroughRule()
 			: ISetupRule(
-				"Feature_EnablePassthrough",
-				NSLOCTEXT("OculusXRPassthroughRules", "EnablePassthrough_DisplayName", "Enable Passthrough"),
-				NSLOCTEXT("OculusXRPassthroughRules", "EnablePassthrough_Description", "Passthrough must be enabled when using passthrough features"),
-				ESetupRuleCategory::Features,
-				ESetupRuleSeverity::Critical) {}
+				  "Feature_EnablePassthrough",
+				  NSLOCTEXT("OculusXRPassthroughRules", "EnablePassthrough_DisplayName", "Enable Passthrough"),
+				  NSLOCTEXT("OculusXRPassthroughRules", "EnablePassthrough_Description", "Passthrough must be enabled when using passthrough features"),
+				  ESetupRuleCategory::Features,
+				  ESetupRuleSeverity::Critical) {}
 		virtual bool IsApplied() const override;
 		virtual bool IsValid() override;
 
@@ -30,11 +30,11 @@ namespace OculusXRPassthroughRules
 	public:
 		FAllowAlphaToneMapperPassthroughRule()
 			: ISetupRule(
-				"Feature_AllowAlphaToneMapperPassthrough",
-				NSLOCTEXT("OculusXRPassthroughRules", "AllowAlphaToneMapperPassthrough_DisplayName", "Enable passing alpha channel through tonemapper"),
-				NSLOCTEXT("OculusXRPassthroughRules", "AllowAlphaToneMapperPassthrough_Description", "For passthrough to work over Link alpha channel must be passed through tonemapper."),
-				ESetupRuleCategory::Features,
-				ESetupRuleSeverity::Warning) {}
+				  "Feature_AllowAlphaToneMapperPassthrough",
+				  NSLOCTEXT("OculusXRPassthroughRules", "AllowAlphaToneMapperPassthrough_DisplayName", "Enable passing alpha channel through tonemapper"),
+				  NSLOCTEXT("OculusXRPassthroughRules", "AllowAlphaToneMapperPassthrough_Description", "For passthrough to work over Link alpha channel must be passed through tonemapper."),
+				  ESetupRuleCategory::Features,
+				  ESetupRuleSeverity::Warning) {}
 		virtual bool IsApplied() const override;
 		virtual bool IsValid() override;
 

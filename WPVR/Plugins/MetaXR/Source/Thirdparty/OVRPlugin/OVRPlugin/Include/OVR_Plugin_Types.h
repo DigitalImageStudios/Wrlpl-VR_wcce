@@ -29,7 +29,7 @@
 // Note: OVRP_MINOR_VERSION == OCULUS_SDK_VERSION + 32
 
 #define OVRP_MAJOR_VERSION 1
-#define OVRP_MINOR_VERSION 97
+#define OVRP_MINOR_VERSION 99
 #define OVRP_PATCH_VERSION 0
 
 #define OVRP_VERSION OVRP_MAJOR_VERSION, OVRP_MINOR_VERSION, OVRP_PATCH_VERSION
@@ -174,10 +174,8 @@ typedef enum {
   ovrpFailure_SpaceTooDark = -9005,
   ovrpFailure_SpaceTooBright = -9006,
 
-
-
-
-
+  /// Boundary Visibility cases
+  ovrpWarning_BoundaryVisibilitySuppressionNotAllowed = 9030,
 } ovrpResult;
 
 #define OVRP_SUCCESS(result) ((result) >= 0)
@@ -206,6 +204,7 @@ typedef enum {
 
   /// Allow OVRPlugin (OpenXR backend) runs with non-Oculus OpenXR runtime
   ovrpPreinitializeFlag_SupportNonOculusRuntime = (1 << 3),
+  ovrpPreinitializeFlag_DisableLogSystemError = (1 << 4),
   ovrpPreinitializeFlag_EnumSize = 0x7fffffff
 } ovrpPreinitializeFlags;
 
@@ -243,6 +242,11 @@ typedef enum {
 
   /// XR instance / session would be created by external engine, to support their OpenXR Plugins
   ovrpInitializeFlag_ExternalXrObjects = (1 << 7),
+
+
+
+
+
 
   ovrpInitializeFlag_EnumSize = 0x7fffffff
 
@@ -542,6 +546,26 @@ typedef enum {
 
 
 } ovrpFoveationFlags;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 /// Control the activation of mixed reality capture
 typedef enum {
@@ -1199,6 +1223,9 @@ typedef enum {
 
 
 
+
+
+
 } ovrpLayerFlags;
 
 /// Layer description used by ovrp_SetupLayer to create the layer
@@ -1295,6 +1322,11 @@ typedef enum {
   ovrpLayerSubmitFlag_SecureContent = (1 << 17),
   // Layer flag to automatically apply sharpening or supersamping filter
   ovrpLayerSubmitFlag_AutoLayerFilter = (1 << 18),
+
+
+
+
+
 
 } ovrpLayerSubmitFlags;
 
@@ -2424,9 +2456,7 @@ typedef enum ovrpEventType_ {
 
   ovrpEventType_PassthroughLayerResumed = 500,
 
-
-
-
+  ovrpEventType_BoundaryVisibilityChanged = 510,
 
 
 
@@ -2823,20 +2853,6 @@ typedef struct {
   /// An intensity value can be in the range [0.0, 1.0] where 0.0 is the lowest intensity.
   float RightHandIntensity;
 } ovrpInsightPassthroughKeyboardHandsIntensity;
-
-//-----------------------------------------------------------------
-// Insight Passthrough Space Transformation
-//-----------------------------------------------------------------
-
-
-
-
-
-
-
-
-
-
 
 //-----------------------------------------------------------------
 // Spatial Anchors
@@ -3504,6 +3520,9 @@ typedef enum {
   ovrpSpaceDiscoveryFilterType_None = 0,
   ovrpSpaceDiscoveryFilterType_Ids = 2,
   ovrpSpaceDiscoveryFilterType_Components = 3,
+
+
+
   ovrpSpaceDiscoveryFilterType_Max = 0x7ffffff,
 } ovrpSpaceDiscoveryFilterType;
 
@@ -3521,6 +3540,13 @@ typedef struct ovrpSpaceDiscoveryFilterComponents_ {
   ovrpSpaceDiscoveryFilterType Type;
   ovrpSpaceComponentType ComponentType;
 } ovrpSpaceDiscoveryFilterComponents;
+
+
+
+
+
+
+
 
 typedef struct ovrpSpaceDiscoveryInfo_ {
   ovrpUInt32 FilterCount;
@@ -3582,18 +3608,16 @@ typedef struct ovrpEventDataPassthroughLayerResumed_ {
 
 
 
+typedef enum {
+  ovrpBoundaryVisibility_NotSuppressed = 1,
+  ovrpBoundaryVisibility_Suppressed = 2,
+  ovrpBoundaryVisibility_Max = 0x7FFFFFFF
+} ovrpBoundaryVisibility;
 
-
-
-
-
-
-
-
-
-
-
-
+typedef struct ovrpEventDataBoundaryVisibilityChanged_ {
+  ovrpEventType EventType;
+  ovrpBoundaryVisibility BoundaryVisibility;
+} ovrpEventDataBoundaryVisibilityChanged;
 
 typedef struct ovrpEnvironmentDepthTextureDesc_ {
   ovrpSizei TextureSize;
@@ -3620,6 +3644,13 @@ typedef enum {
   ovrpEnvironmentDepthCreateFlag_None = 0,
   ovrpEnvironmentDepthCreateFlag_RemoveHands = 1 << 0,
 } ovrpEnvironmentDepthCreateFlag;
+
+
+
+
+
+
+
 
 
 

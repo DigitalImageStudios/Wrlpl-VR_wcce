@@ -16,7 +16,7 @@
 
 #pragma warning(push)
 #pragma warning(disable : 4201) // nonstandard extension used: nameless struct/union
-//#pragma warning(disable:4668)		// 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
+// #pragma warning(disable:4668)		// 'symbol' is not defined as a preprocessor macro, replacing with '0' for 'directives'
 #define OVRP_EXPORT typedef
 #include "OVR_Plugin.h"
 #include "OVR_Plugin_Insight.h"
@@ -115,6 +115,8 @@ struct OculusPluginWrapper
 	OCULUS_DECLARE_ENTRY_POINT(GetTrackingPositionSupported2);
 	OCULUS_DECLARE_ENTRY_POINT(GetTrackingPositionEnabled2);
 	OCULUS_DECLARE_ENTRY_POINT(SetTrackingPositionEnabled2);
+	OCULUS_DECLARE_ENTRY_POINT(GetTrackingPoseEnabledForInvisibleSession);
+	OCULUS_DECLARE_ENTRY_POINT(SetTrackingPoseEnabledForInvisibleSession);
 	OCULUS_DECLARE_ENTRY_POINT(GetTrackingIPDEnabled2);
 	OCULUS_DECLARE_ENTRY_POINT(SetTrackingIPDEnabled2);
 	OCULUS_DECLARE_ENTRY_POINT(GetTrackingCalibratedOrigin2);
@@ -222,7 +224,7 @@ struct OculusPluginWrapper
 	OCULUS_DECLARE_ENTRY_POINT(GetTrackingTransformRawPose);
 	OCULUS_DECLARE_ENTRY_POINT(GetTrackingTransformRelativePose);
 	OCULUS_DECLARE_ENTRY_POINT(GetTimeInSeconds);
-	//OCULUS_DECLARE_ENTRY_POINT(GetPTWNear);
+	// OCULUS_DECLARE_ENTRY_POINT(GetPTWNear);
 	OCULUS_DECLARE_ENTRY_POINT(GetASWVelocityScale);
 	OCULUS_DECLARE_ENTRY_POINT(GetASWDepthScale);
 	OCULUS_DECLARE_ENTRY_POINT(GetASWAdaptiveMode);
@@ -233,6 +235,7 @@ struct OculusPluginWrapper
 	OCULUS_DECLARE_ENTRY_POINT(GetHandState);
 	OCULUS_DECLARE_ENTRY_POINT(GetHandState2);
 	OCULUS_DECLARE_ENTRY_POINT(GetSkeleton2);
+	OCULUS_DECLARE_ENTRY_POINT(GetSkeleton3);
 	OCULUS_DECLARE_ENTRY_POINT(GetMesh);
 	OCULUS_DECLARE_ENTRY_POINT(GetLocalTrackingSpaceRecenterCount);
 	OCULUS_DECLARE_ENTRY_POINT(GetSystemHmd3DofModeEnabled);
@@ -299,6 +302,9 @@ struct OculusPluginWrapper
 
 
 
+	// Boundary Visibility
+	OCULUS_DECLARE_ENTRY_POINT(RequestBoundaryVisibility);
+	OCULUS_DECLARE_ENTRY_POINT(GetBoundaryVisibility);
 
 	// Local Groups
 
@@ -335,7 +341,7 @@ struct OculusPluginWrapper
 	OCULUS_DECLARE_ENTRY_POINT(OnEditorShutdown);
 	OCULUS_DECLARE_ENTRY_POINT(QplSetConsent);
 
-	//OVR_Plugin_Insight.h
+	// OVR_Plugin_Insight.h
 	OCULUS_DECLARE_ENTRY_POINT(InitializeInsightPassthrough);
 	OCULUS_DECLARE_ENTRY_POINT(ShutdownInsightPassthrough);
 	OCULUS_DECLARE_ENTRY_POINT(GetInsightPassthroughInitialized);
@@ -354,7 +360,7 @@ struct OculusPluginWrapper
 	OCULUS_DECLARE_ENTRY_POINT(GetPassthroughCapabilities);
 	OCULUS_DECLARE_ENTRY_POINT(GetPassthroughPreferences);
 
-	//OVR_Plugin_MixedReality.h
+	// OVR_Plugin_MixedReality.h
 
 	OCULUS_DECLARE_ENTRY_POINT(InitializeMixedReality);
 	OCULUS_DECLARE_ENTRY_POINT(ShutdownMixedReality);

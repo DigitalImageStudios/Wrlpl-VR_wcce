@@ -2,6 +2,7 @@
 
 #pragma once
 #include "CoreMinimal.h"
+#include "OculusXRProjectSetupToolModule.h"
 
 #define OCULUSXR_UPDATE_SETTINGS(SettingsClass, PropertyName, PropertyValue) \
 	{                                                                        \

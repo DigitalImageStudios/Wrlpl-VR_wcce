@@ -12,6 +12,12 @@
 
 bool OculusXRMovement::IsFullBodyTrackingEnabled()
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	bool bResult = false;
 
 	ovrpBool IsEnabled = ovrpBool_False;
@@ -27,6 +33,12 @@ bool OculusXRMovement::IsFullBodyTrackingEnabled()
 
 bool OculusXRMovement::GetBodyState(FOculusXRBodyState& outOculusXRBodyState, float WorldToMeters)
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	static_assert(ovrpBoneId_FullBody_End == static_cast<int>(EOculusXRBoneID::COUNT), "The size of the OVRPlugin Bone ID enum should be the same as the EOculusXRBoneID enum.");
 
 	const auto AvailableJoints = IsFullBodyTrackingEnabled() ? ovrpBoneId_FullBody_End : ovrpBoneId_Body_End;
@@ -68,9 +80,61 @@ bool OculusXRMovement::GetBodyState(FOculusXRBodyState& outOculusXRBodyState, fl
 	return false;
 }
 
+bool OculusXRMovement::GetBodySkeleton(FOculusXRBodySkeleton& outOculusXRBodyState, float WorldToMeters)
+{
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
+	ovrpSkeleton3 OVRBodySkeleton = {};
+	ovrpResult OVRBodyStateResult =
+		FOculusXRHMDModule::GetPluginWrapper().GetSkeleton3(
+			(IsFullBodyTrackingEnabled() ? ovrpSkeletonType_FullBody : ovrpSkeletonType_Body),
+			&OVRBodySkeleton);
+	if (OVRP_SUCCESS(OVRBodyStateResult))
+	{
+		checkf(outOculusXRBodyState.Bones.Num() >= static_cast<int32>(OVRBodySkeleton.NumBones),
+			TEXT("Not enough bones in OVRBosySkeleton::Bones array. You must have at least %d joints"),
+			OVRBodySkeleton.NumBones);
+
+		outOculusXRBodyState.NumBones = OVRBodySkeleton.NumBones;
+		for (uint32 i = 0; i < OVRBodySkeleton.NumBones; ++i)
+		{
+			ovrpBone OVRBone = OVRBodySkeleton.Bones[i];
+			ovrpPosef OVRBonePose = OVRBone.Pose;
+
+			FOculusXRBodySkeletonBone& OculusXRBone = outOculusXRBodyState.Bones[i];
+
+			OculusXRBone.Orientation = FRotator(OculusXRHMD::ToFQuat(OVRBonePose.Orientation));
+			OculusXRBone.Position = OculusXRHMD::ToFVector(OVRBonePose.Position) * WorldToMeters;
+
+			if (OVRBone.ParentBoneIndex == ovrpBoneId_Invalid)
+			{
+				OculusXRBone.ParentBoneIndex = EOculusXRBoneID::None;
+			}
+			else
+			{
+				OculusXRBone.ParentBoneIndex = static_cast<EOculusXRBoneID>(OVRBone.ParentBoneIndex);
+			}
+
+			OculusXRBone.BoneId = static_cast<EOculusXRBoneID>(OVRBone.BoneId);
+		}
+
+		return true;
+	}
+	return false;
+}
 
 bool OculusXRMovement::IsBodyTrackingEnabled()
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	bool bResult = false;
 
 	ovrpBool IsEnabled = ovrpBool_False;
@@ -86,6 +150,12 @@ bool OculusXRMovement::IsBodyTrackingEnabled()
 
 bool OculusXRMovement::IsBodyTrackingSupported()
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	bool bResult = false;
 
 	ovrpBool IsSupported = ovrpBool_False;
@@ -101,6 +171,12 @@ bool OculusXRMovement::IsBodyTrackingSupported()
 
 bool OculusXRMovement::RequestBodyTrackingFidelity(EOculusXRBodyTrackingFidelity fidelity)
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	static_assert(static_cast<int>(EOculusXRBodyTrackingFidelity::Low) == static_cast<int>(ovrpBodyTrackingFidelity2::ovrpBodyTrackingFidelity2_Low), "EOculusXRBodyTrackingFidelity and ovrpBodyTrackingFidelity2 should be sync");
 	static_assert(static_cast<int>(EOculusXRBodyTrackingFidelity::High) == static_cast<int>(ovrpBodyTrackingFidelity2::ovrpBodyTrackingFidelity2_High), "EOculusXRBodyTrackingFidelity and ovrpBodyTrackingFidelity2 should be sync");
 
@@ -115,17 +191,35 @@ bool OculusXRMovement::RequestBodyTrackingFidelity(EOculusXRBodyTrackingFidelity
 
 bool OculusXRMovement::ResetBodyTrackingCalibration()
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	return OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().ResetBodyTrackingCalibration());
 }
 
 bool OculusXRMovement::SuggestBodyTrackingCalibrationOverride(float height)
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	ovrpBodyTrackingCalibrationInfo calibrationInfo{ height };
 	return OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().SuggestBodyTrackingCalibrationOverride(calibrationInfo));
 }
 
 bool OculusXRMovement::StartBodyTracking()
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	static_assert(static_cast<int>(EOculusXRBodyJointSet::UpperBody) == static_cast<int>(ovrpBodyJointSet::ovrpBodyJointSet_UpperBody), "EOculusXRBodyJointSet and ovrpBodyJointSet should be sync");
 	static_assert(static_cast<int>(EOculusXRBodyJointSet::FullBody) == static_cast<int>(ovrpBodyJointSet::ovrpBodyJointSet_FullBody), "EOculusXRBodyJointSet and ovrpBodyJointSet should be sync");
 
@@ -152,6 +246,12 @@ bool OculusXRMovement::StartBodyTracking()
 
 bool OculusXRMovement::StartBodyTrackingByJointSet(EOculusXRBodyJointSet jointSet)
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	bool result = false;
 
 	auto* OculusXRHMD = OculusXRHMD::FOculusXRHMD::GetOculusXRHMD();
@@ -170,12 +270,24 @@ bool OculusXRMovement::StartBodyTrackingByJointSet(EOculusXRBodyJointSet jointSe
 
 bool OculusXRMovement::StopBodyTracking()
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	FOculusXRHMDModule::GetPluginWrapper().RequestBodyTrackingFidelity(ovrpBodyTrackingFidelity2::ovrpBodyTrackingFidelity2_Low);
 	return OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().StopBodyTracking());
 }
 
 bool OculusXRMovement::GetFaceState(FOculusXRFaceState& outOculusXRFaceState)
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	const auto blendShapeCount = ovrpFaceExpression2_Max;
 
 	static_assert(blendShapeCount == static_cast<int>(EOculusXRFaceExpression::COUNT), "The size of the OVRPlugin Face Expression enum should be the same as the EOculusXRFaceExpression enum.");
@@ -214,6 +326,12 @@ bool OculusXRMovement::GetFaceState(FOculusXRFaceState& outOculusXRFaceState)
 
 bool OculusXRMovement::IsFaceTrackingEnabled()
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	bool bResult = false;
 
 	ovrpBool IsEnabled = ovrpBool_False;
@@ -229,6 +347,12 @@ bool OculusXRMovement::IsFaceTrackingEnabled()
 
 bool OculusXRMovement::IsFaceTrackingSupported()
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	bool bResult = false;
 
 	ovrpBool IsSupported = ovrpBool_False;
@@ -244,6 +368,12 @@ bool OculusXRMovement::IsFaceTrackingSupported()
 
 bool OculusXRMovement::StartFaceTracking()
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	const auto* OculusXRHMD = OculusXRHMD::FOculusXRHMD::GetOculusXRHMD();
 	if (OculusXRHMD)
 	{
@@ -260,11 +390,23 @@ bool OculusXRMovement::StartFaceTracking()
 
 bool OculusXRMovement::StopFaceTracking()
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	return OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().StopFaceTracking2());
 }
 
 bool OculusXRMovement::GetEyeGazesState(FOculusXREyeGazesState& outOculusXREyeGazesState, float WorldToMeters)
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	static_assert(ovrpEye_Count == (int)EOculusXREye::COUNT, "The size of the OVRPlugin Eye enum should be the same as the EOculusXREye enum.");
 
 	checkf(outOculusXREyeGazesState.EyeGazes.Num() >= ovrpEye_Count, TEXT("Not enough eye gaze states in FOculusXREyeGazesState::EyeGazes. Requires %d available elements in the array."), ovrpEye_Count);
@@ -293,6 +435,12 @@ bool OculusXRMovement::GetEyeGazesState(FOculusXREyeGazesState& outOculusXREyeGa
 
 bool OculusXRMovement::IsEyeTrackingEnabled()
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	bool bResult = false;
 
 	ovrpBool IsEnabled = ovrpBool_False;
@@ -308,6 +456,12 @@ bool OculusXRMovement::IsEyeTrackingEnabled()
 
 bool OculusXRMovement::IsEyeTrackingSupported()
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	bool bResult = false;
 
 	ovrpBool IsSupported = ovrpBool_False;
@@ -323,11 +477,23 @@ bool OculusXRMovement::IsEyeTrackingSupported()
 
 bool OculusXRMovement::StartEyeTracking()
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	return OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().StartEyeTracking());
 }
 
 bool OculusXRMovement::StopEyeTracking()
 {
+	// Prevent calling plugin functions if the plugin is not available
+	if (!FOculusXRHMDModule::Get().IsOVRPluginAvailable())
+	{
+		return false;
+	}
+
 	return OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().StopEyeTracking());
 }
 

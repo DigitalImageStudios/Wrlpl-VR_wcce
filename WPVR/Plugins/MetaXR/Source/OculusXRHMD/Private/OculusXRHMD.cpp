@@ -61,9 +61,9 @@
 
 static TAutoConsoleVariable<int32> CVarOculusEnableSubsampledLayout(
 	TEXT("r.Mobile.Oculus.EnableSubsampled"),
-	0,
-	TEXT("0: Disable subsampled layout (Default)\n")
-		TEXT("1: Enable subsampled layout on supported platforms\n"),
+	1,
+	TEXT("0: Disable subsampled layout\n")
+		TEXT("1: Enable subsampled layout on supported platforms (Default)\n"),
 	ECVF_Scalability | ECVF_RenderThreadSafe);
 
 static TAutoConsoleVariable<int32> CVarOculusEnableLowLatencyVRS(
@@ -78,6 +78,13 @@ static TAutoConsoleVariable<int32> CVarOculusForceSymmetric(
 	0,
 	TEXT("0: Use standard runtime-provided projection matrices (Default)\n")
 		TEXT("1: Render both eyes with a symmetric projection, union of both FOVs (and corresponding higher rendertarget size to maintain PD)\n"),
+	ECVF_Scalability | ECVF_RenderThreadSafe);
+
+static TAutoConsoleVariable<int32> CVarOculusIncreaseThreadPrio(
+	TEXT("r.Mobile.Oculus.IncreaseThreadPrio"),
+	1,
+	TEXT("0: Use standard engine thread priority for all threads\n")
+		TEXT("1: Use increased thread priority provided by runtime (Default)\n"),
 	ECVF_Scalability | ECVF_RenderThreadSafe);
 
 // AppSpaceWarp
@@ -133,6 +140,55 @@ static const FString USE_SCENE_PERMISSION_NAME("com.oculus.permission.USE_SCENE"
 
 namespace OculusXRHMD
 {
+
+	/**
+	 * A pixel shader for rendering occlusions, this is the min/max preprocessing step.
+	 */
+	template <bool bEnableMultiView>
+	class FScreenPSEnvironmentDepthMinMax : public FGlobalShader
+	{
+		DECLARE_SHADER_TYPE(FScreenPSEnvironmentDepthMinMax, Global);
+
+	public:
+		static bool ShouldCompilePermutation(const FGlobalShaderPermutationParameters& Parameters)
+		{
+			return !bEnableMultiView || Parameters.Platform == SP_VULKAN_ES3_1_ANDROID || Parameters.Platform == SP_VULKAN_SM5;
+		}
+
+		static void ModifyCompilationEnvironment(const FPermutationParameters& Parameters, FShaderCompilerEnvironment& OutEnvironment)
+		{
+			OutEnvironment.SetDefine(TEXT("ENABLE_MULTI_VIEW"), bEnableMultiView ? 1 : 0);
+		}
+
+		FScreenPSEnvironmentDepthMinMax(const ShaderMetaType::CompiledShaderInitializerType& Initializer)
+			: FGlobalShader(Initializer)
+		{
+			InTexture.Bind(Initializer.ParameterMap, TEXT("InTexture"), SPF_Mandatory);
+			InTextureSampler.Bind(Initializer.ParameterMap, TEXT("InTextureSampler"));
+			if (!bEnableMultiView)
+			{
+				InArraySliceParameter.Bind(Initializer.ParameterMap, TEXT("ArraySlice"));
+			}
+		}
+
+		FScreenPSEnvironmentDepthMinMax() {}
+
+		void SetParameters(FRHIBatchedShaderParameters& BatchedParameters, FRHISamplerState* SamplerStateRHI, FRHITexture* TextureRHI, int ArraySlice)
+		{
+			SetTextureParameter(BatchedParameters, InTexture, InTextureSampler, SamplerStateRHI, TextureRHI);
+			if (!bEnableMultiView)
+			{
+				SetShaderValue(BatchedParameters, InArraySliceParameter, ArraySlice);
+			}
+		}
+
+	private:
+		LAYOUT_FIELD(FShaderResourceParameter, InTexture);
+		LAYOUT_FIELD(FShaderResourceParameter, InTextureSampler);
+		LAYOUT_FIELD(FShaderParameter, InArraySliceParameter);
+	};
+	IMPLEMENT_SHADER_TYPE(template <>, FScreenPSEnvironmentDepthMinMax<true>, TEXT("/Plugin/OculusXR/Private/ScreenPSEnvironmentDepthMinMax.usf"), TEXT("Main"), SF_Pixel);
+	IMPLEMENT_SHADER_TYPE(template <>, FScreenPSEnvironmentDepthMinMax<false>, TEXT("/Plugin/OculusXR/Private/ScreenPSEnvironmentDepthMinMax.usf"), TEXT("Main"), SF_Pixel);
 
 #if !UE_BUILD_SHIPPING
 	static void __cdecl OvrpLogCallback(ovrpLogLevel level, const char* message)
@@ -501,7 +557,14 @@ namespace OculusXRHMD
 	{
 		TrackingOrigin = InOrigin;
 		ovrpTrackingOrigin ovrpOrigin = ovrpTrackingOrigin_EyeLevel;
-		if (InOrigin == EHMDTrackingOrigin::Floor)
+
+#if UE_VERSION_OLDER_THAN(5, 4, 0)
+		const bool bIsOrginOnFloor = (InOrigin == EHMDTrackingOrigin::Floor);
+#else
+		const bool bIsOrginOnFloor = (InOrigin == EHMDTrackingOrigin::LocalFloor);
+#endif
+
+		if (bIsOrginOnFloor)
 			ovrpOrigin = ovrpTrackingOrigin_FloorLevel;
 
 		if (InOrigin == EHMDTrackingOrigin::Stage)
@@ -522,7 +585,11 @@ namespace OculusXRHMD
 
 	EHMDTrackingOrigin::Type FOculusXRHMD::GetTrackingOrigin() const
 	{
+#if UE_VERSION_OLDER_THAN(5, 4, 0)
 		EHMDTrackingOrigin::Type rv = EHMDTrackingOrigin::Eye;
+#else
+		EHMDTrackingOrigin::Type rv = EHMDTrackingOrigin::View;
+#endif
 		ovrpTrackingOrigin ovrpOrigin = ovrpTrackingOrigin_EyeLevel;
 
 		if (FOculusXRHMDModule::GetPluginWrapper().GetInitialized() && OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetTrackingOriginType2(&ovrpOrigin)))
@@ -530,10 +597,18 @@ namespace OculusXRHMD
 			switch (ovrpOrigin)
 			{
 				case ovrpTrackingOrigin_EyeLevel:
+#if UE_VERSION_OLDER_THAN(5, 4, 0)
 					rv = EHMDTrackingOrigin::Eye;
+#else
+					rv = EHMDTrackingOrigin::View;
+#endif
 					break;
 				case ovrpTrackingOrigin_FloorLevel:
+#if UE_VERSION_OLDER_THAN(5, 4, 0)
 					rv = EHMDTrackingOrigin::Floor;
+#else
+					rv = EHMDTrackingOrigin::LocalFloor;
+#endif
 					break;
 				case ovrpTrackingOrigin_Stage:
 					rv = EHMDTrackingOrigin::Stage;
@@ -576,7 +651,11 @@ namespace OculusXRHMD
 
 		if (NextFrameToRender)
 		{
+#if UE_VERSION_OLDER_THAN(5, 4, 0)
 			const bool floorLevel = GetTrackingOrigin() != EHMDTrackingOrigin::Eye;
+#else
+			const bool floorLevel = GetTrackingOrigin() != EHMDTrackingOrigin::View;
+#endif
 			ovrpPoseStatef poseState;
 			FOculusXRHMDModule::GetPluginWrapper().Update3(ovrpStep_Render, NextFrameToRender->FrameNumber, 0.0);
 			FOculusXRHMDModule::GetPluginWrapper().GetNodePoseState3(ovrpStep_Render, NextFrameToRender->FrameNumber, ovrpNode_Head, &poseState);
@@ -677,6 +756,7 @@ namespace OculusXRHMD
 		CachedWindow.Reset();
 
 		bHardOcclusionsEnabled = false;
+		bSoftOcclusionsEnabled = false;
 
 #if WITH_EDITOR
 		// @TODO: add more values here.
@@ -688,8 +768,8 @@ namespace OculusXRHMD
 			Settings->ColorScale = ovrpVector4f{ 1, 1, 1, 1 };
 			Settings->ColorOffset = ovrpVector4f{ 0, 0, 0, 0 };
 
-			//Settings->WorldToMetersScale = InWorldContext.World()->GetWorldSettings()->WorldToMeters;
-			//Settings->Flags.bWorldToMetersOverride = false;
+			// Settings->WorldToMetersScale = InWorldContext.World()->GetWorldSettings()->WorldToMeters;
+			// Settings->Flags.bWorldToMetersOverride = false;
 			InitDevice();
 			ResetMultiPlayerPoses();
 
@@ -1196,7 +1276,7 @@ namespace OculusXRHMD
 					}
 				}
 				else
-#endif //WITH_EDITOR
+#endif // WITH_EDITOR
 				{
 					// ApplicationWillTerminateDelegate will fire from inside of the RequestExit
 					FPlatformMisc::RequestExit(false);
@@ -1463,7 +1543,7 @@ namespace OculusXRHMD
 		return VisibleAreaMeshes[0].IsValid() && VisibleAreaMeshes[1].IsValid();
 	}
 
-	static void DrawOcclusionMesh(FRHICommandList& RHICmdList, int32 ViewIndex, const FHMDViewMesh MeshAssets[])
+	static void DrawOcclusionMesh(FRHICommandList& RHICmdList, int32 ViewIndex, const FHMDViewMesh MeshAssets[], int32 InstanceCount = 1)
 	{
 		check(ViewIndex != INDEX_NONE);
 
@@ -1472,9 +1552,20 @@ namespace OculusXRHMD
 		check(Mesh.IsValid());
 
 		RHICmdList.SetStreamSource(0, Mesh.VertexBufferRHI, 0);
-		RHICmdList.DrawIndexedPrimitive(Mesh.IndexBufferRHI, 0, 0, Mesh.NumVertices, 0, Mesh.NumTriangles, 1);
+		RHICmdList.DrawIndexedPrimitive(Mesh.IndexBufferRHI, 0, 0, Mesh.NumVertices, 0, Mesh.NumTriangles, InstanceCount);
 	}
 
+#ifdef WITH_OCULUS_BRANCH
+	void FOculusXRHMD::DrawHiddenAreaMesh(FRHICommandList& RHICmdList, int32 ViewIndex, int32 InstanceCount) const
+	{
+		DrawOcclusionMesh(RHICmdList, ViewIndex, HiddenAreaMeshes, InstanceCount);
+	}
+
+	void FOculusXRHMD::DrawVisibleAreaMesh(FRHICommandList& RHICmdList, int32 ViewIndex, int32 InstanceCount) const
+	{
+		DrawOcclusionMesh(RHICmdList, ViewIndex, VisibleAreaMeshes, InstanceCount);
+	}
+#else
 	void FOculusXRHMD::DrawHiddenAreaMesh(FRHICommandList& RHICmdList, int32 ViewIndex) const
 	{
 		DrawOcclusionMesh(RHICmdList, ViewIndex, HiddenAreaMeshes);
@@ -1484,6 +1575,7 @@ namespace OculusXRHMD
 	{
 		DrawOcclusionMesh(RHICmdList, ViewIndex, VisibleAreaMeshes);
 	}
+#endif // WITH_OCULUS_BRANCH
 
 	float FOculusXRHMD::GetPixelDenity() const
 	{
@@ -1594,7 +1686,9 @@ namespace OculusXRHMD
 		if (bStereo)
 		{
 			LoadFromSettings();
-			CheckMultiPlayer();
+#if PLATFORM_WINDOWS
+			FOculusXRHMDModule::GetPluginWrapper().SetTrackingPoseEnabledForInvisibleSession(GetMutableDefault<UOculusXRHMDRuntimeSettings>()->bUpdateHeadPoseForInactivePlayer);
+#endif
 		}
 
 		return DoEnableStereo(bStereo);
@@ -1746,9 +1840,9 @@ namespace OculusXRHMD
 		// Don't use GetStereoProjectionMatrix because it is game thread only on oculus, we also don't need the zplane adjustments for this.
 		const FMatrix StereoProjectionMatrix = ToFMatrix(Settings_RenderThread->EyeProjectionMatrices[ViewIndex]);
 
-		//0,0,1 is the straight ahead point, wherever it maps to is the center of the projection plane in -1..1 coordinates.  -1,-1 is bottom left.
+		// 0,0,1 is the straight ahead point, wherever it maps to is the center of the projection plane in -1..1 coordinates.  -1,-1 is bottom left.
 		const FVector4 ScreenCenter = StereoProjectionMatrix.TransformPosition(FVector(0.0f, 0.0f, 1.0f));
-		//transform into 0-1 screen coordinates 0,0 is top left.
+		// transform into 0-1 screen coordinates 0,0 is top left.
 		const FVector2D CenterPoint(0.5f + (ScreenCenter.X / 2.0f), 0.5f - (ScreenCenter.Y / 2.0f));
 
 		return CenterPoint;
@@ -1813,7 +1907,11 @@ namespace OculusXRHMD
 		return IsStereoEnabled();
 	}
 
+#ifdef WITH_OCULUS_BRANCH
+	void FOculusXRHMD::CalculateRenderTargetSize(uint32& InOutSizeX, uint32& InOutSizeY)
+#else  // WITH_OCULUS_BRANCH
 	void FOculusXRHMD::CalculateRenderTargetSize(const FViewport& Viewport, uint32& InOutSizeX, uint32& InOutSizeY)
+#endif // WITH_OCULUS_BRANCH
 	{
 		// TODO this should use Settings_RenderThread if !CheckInGameThread()
 		// This is called before StartRenderFrame_GameThread() on startup
@@ -2027,7 +2125,7 @@ namespace OculusXRHMD
 #endif // WITH_OCULUS_BRANCH
 
 #if defined(WITH_OCULUS_BRANCH)
-	bool FOculusXRHMD::FindEnvironmentDepthTexture_RenderThread(FTextureRHIRef& OutTexture, FVector2f& OutDepthFactors, FMatrix44f OutScreenToDepthMatrices[2], FMatrix44f OutDepthViewProjMatrices[2])
+	bool FOculusXRHMD::FindEnvironmentDepthTexture_RenderThread(FTextureRHIRef& OutTexture, FTextureRHIRef& OutMinMaxTexture, FVector2f& OutDepthFactors, FMatrix44f OutScreenToDepthMatrices[2], FMatrix44f OutDepthViewProjMatrices[2])
 	{
 		CheckInRenderThread();
 
@@ -2041,6 +2139,7 @@ namespace OculusXRHMD
 					return false;
 				}
 				OutTexture = EnvironmentDepthSwapchain[SwapchainIndex];
+				OutMinMaxTexture = EnvironmentDepthMinMaxTexture;
 				return true;
 			}
 		}
@@ -2219,7 +2318,7 @@ namespace OculusXRHMD
 
 	void FOculusXRHMD::SetSplashRotationToForward()
 	{
-		//if update splash screen is shown, update the head orientation default to recenter splash screens
+		// if update splash screen is shown, update the head orientation default to recenter splash screens
 		FQuat HeadOrientation = FQuat::Identity;
 		FVector HeadPosition;
 		GetCurrentPose(HMDDeviceId, HeadOrientation, HeadPosition);
@@ -2475,6 +2574,11 @@ namespace OculusXRHMD
 		// Update performance stats
 		PerformanceStats.Frames++;
 		PerformanceStats.Seconds = FPlatformTime::Seconds();
+
+		if (bSoftOcclusionsEnabled && EnvironmentDepthMinMaxTexture != nullptr && !EnvironmentDepthSwapchain.IsEmpty())
+		{
+			RenderEnvironmentDepthMinMaxTexture_RenderThread(RHICmdList);
+		}
 	}
 
 	void FOculusXRHMD::PreRenderView_RenderThread(FRDGBuilder& GraphBuilder, FSceneView& InView)
@@ -2597,7 +2701,11 @@ namespace OculusXRHMD
 	{
 		Flags.Raw = 0;
 		OCFlags.Raw = 0;
-		TrackingOrigin = EHMDTrackingOrigin::Type::Eye;
+#if UE_VERSION_OLDER_THAN(5, 4, 0)
+		TrackingOrigin = EHMDTrackingOrigin::Eye;
+#else
+		TrackingOrigin = EHMDTrackingOrigin::View;
+#endif
 		DeltaControlRotation = FRotator::ZeroRotator; // used from ApplyHmdRotation
 		LastPlayerOrientation = FQuat::Identity;
 		LastPlayerLocation = FVector::ZeroVector;
@@ -2619,7 +2727,6 @@ namespace OculusXRHMD
 
 		bIsStandaloneStereoOnlyDevice = IHeadMountedDisplayModule::IsAvailable() && IHeadMountedDisplayModule::Get().IsStandaloneStereoOnlyDevice();
 
-		bMultiPlayer = false;
 		CurPlayerIndex = 0;
 		LastFrameHMDHeadPose = FPose();
 		MultiPlayerPoses.Empty();
@@ -2877,7 +2984,7 @@ namespace OculusXRHMD
 		FOculusXRHMDModule::GetPluginWrapper().SetFoveationEyeTracked(FoveatedRenderingMethod == EOculusXRFoveatedRenderingMethod::EyeTrackedFoveatedRendering);
 		FOculusXRHMDModule::GetPluginWrapper().SetTiledMultiResLevel((ovrpTiledMultiResLevel)FoveatedRenderingLevel.load());
 		FOculusXRHMDModule::GetPluginWrapper().SetTiledMultiResDynamic(bDynamicFoveatedRendering.load());
-		FOculusXRHMDModule::GetPluginWrapper().SetAppCPUPriority2(ovrpBool_True);
+		FOculusXRHMDModule::GetPluginWrapper().SetAppCPUPriority2(((ovrpBool)CVarOculusIncreaseThreadPrio.GetValueOnAnyThread()));
 		FOculusXRHMDModule::GetPluginWrapper().SetLocalDimming(ovrpBool_True);
 
 		OCFlags.NeedSetTrackingOrigin = true;
@@ -3641,7 +3748,7 @@ namespace OculusXRHMD
 					}
 				}
 			}
-#endif //WITH_EDITOR
+#endif // WITH_EDITOR
 
 			// We're not currently rendering a frame, so just use whatever world to meters the main world is using.
 			// This can happen when we're polling input in the main engine loop, before ticking any worlds.
@@ -3948,6 +4055,21 @@ namespace OculusXRHMD
 						EnvironmentDepthSwapchain = CustomPresent->CreateSwapChainTextures_RenderThread(SizeX, SizeY, DepthFormat, DepthTextureBinding, NumMips, NumSamples, NumSamplesTileMem, ResourceType, DepthTextures, DepthTexCreateFlags, *FString::Printf(TEXT("Oculus Environment Depth Swapchain")));
 					}
 
+					ETextureCreateFlags MinMaxTextureCreateFlags = TexCreate_ShaderResource | TexCreate_RenderTargetable;
+					FRHITextureCreateDesc MinMaxTextureDesc = FRHITextureCreateDesc::Create(TEXT("EnvironmentDepthMinMaxTexture"), DepthTextureDesc.Layout == ovrpLayout_Array ? ETextureDimension::Texture2DArray : ETextureDimension::Texture2D)
+																  .SetExtent(SizeX, SizeY)
+																  .SetFormat(PF_FloatRGBA) // Note: PF_R16G16B16A16_UNORM would be better from a precision perspective but is less performant.
+																  .SetNumMips(NumMips)
+																  .SetNumSamples(NumSamples)
+																  .SetClearValue(FClearValueBinding::None);
+					if (DepthTextureDesc.Layout == ovrpLayout_Array)
+					{
+						MinMaxTextureDesc.SetArraySize(2);
+						MinMaxTextureCreateFlags |= TexCreate_TargetArraySlicesIndependently;
+					}
+					MinMaxTextureDesc.SetFlags(MinMaxTextureCreateFlags);
+					EnvironmentDepthMinMaxTexture = RHICreateTexture(MinMaxTextureDesc);
+
 					FOculusXRHMDModule::GetPluginWrapper().SetEnvironmentDepthHandRemoval(bEnvironmentDepthHandRemovalEnabled);
 					FOculusXRHMDModule::GetPluginWrapper().StartEnvironmentDepth();
 				}
@@ -3958,16 +4080,16 @@ namespace OculusXRHMD
 	void FOculusXRHMD::StopEnvironmentDepth()
 	{
 		ExecuteOnRenderThread_DoNotWait([this]() {
-			ExecuteOnRHIThread_DoNotWait([this]() {
-				if (!EnvironmentDepthSwapchain.IsEmpty())
-				{
-					EnvironmentDepthSwapchain.Empty();
-				}
-				if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().StopEnvironmentDepth()))
-				{
-					FOculusXRHMDModule::GetPluginWrapper().DestroyEnvironmentDepth();
-				}
-			});
+			if (!EnvironmentDepthSwapchain.IsEmpty())
+			{
+				EnvironmentDepthSwapchain.Empty();
+			}
+			if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().StopEnvironmentDepth()))
+			{
+				FOculusXRHMDModule::GetPluginWrapper().DestroyEnvironmentDepth();
+			}
+			EnvironmentDepthMinMaxTexture = nullptr;
+			PrevEnvironmentDepthMinMaxSwapchainIndex = -1;
 		});
 	}
 
@@ -3979,6 +4101,11 @@ namespace OculusXRHMD
 	void FOculusXRHMD::EnableHardOcclusions(bool bEnable)
 	{
 		bHardOcclusionsEnabled = bEnable;
+	}
+
+	void FOculusXRHMD::EnableSoftOcclusions(bool bEnable)
+	{
+		bSoftOcclusionsEnabled = bEnable;
 	}
 
 	bool FOculusXRHMD::DoEnableStereo(bool bStereo)
@@ -4276,12 +4403,10 @@ namespace OculusXRHMD
 		ovrpEnvironmentDepthFrameDesc DepthFrameDesc[ovrpEye_Count];
 		if (FOculusXRHMDModule::GetPluginWrapper().GetEnvironmentDepthFrameDesc(ovrpEye_Left, &DepthFrameDesc[0]) != ovrpSuccess || !DepthFrameDesc[0].IsValid)
 		{
-			UE_LOG(LogHMD, Error, TEXT("Failed to load a depth texture frame description for the left eye."));
 			return false;
 		}
 		if (FOculusXRHMDModule::GetPluginWrapper().GetEnvironmentDepthFrameDesc(ovrpEye_Right, &DepthFrameDesc[1]) != ovrpSuccess || !DepthFrameDesc[1].IsValid)
 		{
-			UE_LOG(LogHMD, Error, TEXT("Failed to load a depth texture frame description for the right eye."));
 			return false;
 		}
 
@@ -4298,7 +4423,7 @@ namespace OculusXRHMD
 				DepthFrustum.zFar = DepthFrameDesc[i].FarZ * WorldToMetersScale;
 				FMatrix DepthProjectionMatrix = ToFMatrix(ovrpMatrix4f_Projection(DepthFrustum, true));
 
-				auto DepthOrientation = ToFQuat(DepthFrameDesc[i].CreatePose.Orientation);
+				auto DepthOrientation = Frame_RenderThread->TrackingToWorld.GetRotation() * ToFQuat(DepthFrameDesc[i].CreatePose.Orientation);
 
 				// NOTE: This matrix is the same as applied in SetupViewFrustum in SceneView.cpp
 				auto ViewMatrix = DepthOrientation.Inverse().ToMatrix() * FMatrix(FPlane(0, 0, 1, 0), FPlane(1, 0, 0, 0), FPlane(0, 1, 0, 0), FPlane(0, 0, 0, 1));
@@ -4436,7 +4561,6 @@ namespace OculusXRHMD
 
 		if (!Frame_RenderThread.IsValid() || InView.bIsSceneCapture || InView.bIsReflectionCapture || InView.bIsPlanarReflection || !ComputeEnvironmentDepthParameters_RenderThread(DepthFactors, ScreenToDepthMatrices, nullptr, SwapchainIndex))
 		{
-			UE_LOG(LogHMD, Error, TEXT("Failed to compute a depth texture parameters"));
 			return;
 		}
 		if (SwapchainIndex >= EnvironmentDepthSwapchain.Num())
@@ -4514,6 +4638,100 @@ namespace OculusXRHMD
 		}
 	}
 
+	void FOculusXRHMD::RenderEnvironmentDepthMinMaxTexture_RenderThread(FRHICommandListImmediate& RHICmdList)
+	{
+		ovrpEnvironmentDepthFrameDesc DepthFrameDesc;
+		if (FOculusXRHMDModule::GetPluginWrapper().GetEnvironmentDepthFrameDesc(ovrpEye_Left, &DepthFrameDesc) != ovrpSuccess || !DepthFrameDesc.IsValid)
+		{
+			return;
+		}
+		if (EnvironmentDepthSwapchain.Num() <= DepthFrameDesc.SwapchainIndex || DepthFrameDesc.SwapchainIndex == PrevEnvironmentDepthMinMaxSwapchainIndex)
+		{
+			return;
+		}
+
+		FRHIRenderPassInfo RPInfo(EnvironmentDepthMinMaxTexture, ERenderTargetActions::DontLoad_Store);
+		int32 SliceCount = EnvironmentDepthMinMaxTexture->GetDesc().ArraySize;
+		bool bEnableMultiView = GSupportsMobileMultiView;
+		if (bEnableMultiView)
+		{
+			RPInfo.MultiViewCount = 2;
+			SliceCount = 1;
+		}
+		for (int32 SliceIndex = 0; SliceIndex < SliceCount; ++SliceIndex)
+		{
+			if (!bEnableMultiView)
+			{
+				RPInfo.ColorRenderTargets[0].ArraySlice = SliceIndex;
+			}
+			RHICmdList.BeginRenderPass(RPInfo, TEXT("EnvironmentDepthMinMaxPrePass"));
+			{
+				auto SrcTexture = EnvironmentDepthSwapchain[DepthFrameDesc.SwapchainIndex];
+				auto Extent = SrcTexture->GetDesc().Extent;
+				const uint32 ViewportWidth = Extent.X;
+				const uint32 ViewportHeight = Extent.Y;
+				const FIntPoint TargetSize(ViewportWidth, ViewportHeight);
+
+				FGraphicsPipelineStateInitializer GraphicsPSOInit;
+				GraphicsPSOInit.BlendState = TStaticBlendState<>::GetRHI();
+				GraphicsPSOInit.RasterizerState = TStaticRasterizerState<>::GetRHI();
+				GraphicsPSOInit.DepthStencilState = TStaticDepthStencilState<false, CF_Always>::GetRHI();
+				GraphicsPSOInit.PrimitiveType = PT_TriangleList;
+
+				const auto FeatureLevel = Settings_RenderThread->CurrentFeatureLevel;
+				auto ShaderMap = GetGlobalShaderMap(FeatureLevel);
+				TShaderMapRef<FScreenVS> VertexShader(ShaderMap);
+				GraphicsPSOInit.BoundShaderState.VertexDeclarationRHI = GFilterVertexDeclaration.VertexDeclarationRHI;
+				GraphicsPSOInit.BoundShaderState.VertexShaderRHI = VertexShader.GetVertexShader();
+
+				RHICmdList.ApplyCachedRenderTargets(GraphicsPSOInit);
+				FRHISamplerState* SamplerState = TStaticSamplerState<SF_Point>::GetRHI();
+
+				FRHIBatchedShaderParameters& BatchedParameters = RHICmdList.GetScratchShaderParameters();
+				if (bEnableMultiView)
+				{
+					GraphicsPSOInit.MultiViewCount = 2;
+					TShaderMapRef<FScreenPSEnvironmentDepthMinMax<true>> PixelShader(ShaderMap);
+					GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PixelShader.GetPixelShader();
+					PixelShader->SetParameters(BatchedParameters, SamplerState, SrcTexture, SliceIndex);
+				}
+				else
+				{
+					TShaderMapRef<FScreenPSEnvironmentDepthMinMax<false>> PixelShader(ShaderMap);
+					GraphicsPSOInit.BoundShaderState.PixelShaderRHI = PixelShader.GetPixelShader();
+					PixelShader->SetParameters(BatchedParameters, SamplerState, SrcTexture, SliceIndex);
+				}
+				SetGraphicsPipelineState(RHICmdList, GraphicsPSOInit, 0);
+				RHICmdList.SetBatchedShaderParameters(RHICmdList.GetBoundPixelShader(), BatchedParameters);
+
+#ifdef WITH_OCULUS_BRANCH
+				// If GSupportsMultiViewPerViewViewports is true then we must specify a stereo viewport otherwise
+				// it will lead to undefined behaviour in the right eye.
+				if (GSupportsMultiViewPerViewViewports)
+				{
+					RHICmdList.SetStereoViewport(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, ViewportWidth, ViewportWidth, ViewportHeight, ViewportHeight, 1.0f);
+					RHICmdList.SetStereoScissor(0.0f, 0.0f, 0.0f, 0.0f, ViewportWidth, ViewportWidth, ViewportHeight, ViewportHeight);
+				}
+				else
+#endif
+				{
+					RHICmdList.SetViewport(0.0f, 0.0f, 0.0f, ViewportWidth, ViewportHeight, 1.0f);
+				}
+
+				RendererModule->DrawRectangle(
+					RHICmdList,
+					0.0f, 0.0f, ViewportWidth, ViewportHeight,
+					0.0f, 0.0f, 1.0f, 1.0f,
+					TargetSize,
+					FIntPoint(1, 1),
+					VertexShader,
+					EDRF_Default);
+			}
+			RHICmdList.EndRenderPass();
+		}
+		PrevEnvironmentDepthMinMaxSwapchainIndex = DepthFrameDesc.SwapchainIndex;
+	}
+
 	FSettingsPtr FOculusXRHMD::CreateNewSettings() const
 	{
 		FSettingsPtr Result(MakeShareable(new FSettings()));
@@ -4540,16 +4758,15 @@ namespace OculusXRHMD
 		CheckInGameThread();
 		check(Settings.IsValid());
 
-		// TODO: Below check should NOT be limited to bMultiPlayer specificially even though we haven't found a non-MultiPlayer case falling into this case yet.
-		//		Remove bMultiPlayer.
-		if (bMultiPlayer && !bShouldWait_GameThread)
+		// bShouldWait_GameThread is to prevent to WaitToBeginFrame() twice back-two-back (for two frames) which will further fall into a deadlock.
+		if (!bShouldWait_GameThread)
 		{
 			return;
 		}
 
 		if (!Frame.IsValid())
 		{
-			Splash->UpdateLoadingScreen_GameThread(); //the result of this is used in CreateGameFrame to know if Frame is a "real" one or a "splash" one.
+			Splash->UpdateLoadingScreen_GameThread(); // the result of this is used in CreateGameFrame to know if Frame is a "real" one or a "splash" one.
 			if (Settings->Flags.bHMDEnabled)
 			{
 				Frame = CreateNewGameFrame();
@@ -4694,10 +4911,9 @@ namespace OculusXRHMD
 	{
 		CheckInRenderThread();
 
-		// TODO: Below check should NOT be limited to bMultiPlayer specificially even though we haven't found a non-MultiPlayer case falling into this case yet.
-		//		Remove bMultiPlayer.
-		if (bMultiPlayer && !bIsRendering_RenderThread)
-		{ //we must keep Frame_RenderThread alive if we haven't started to use it to render yet!
+		// bIsRendering_RenderThread is to keep Frame_RenderThread alive if we haven't started to use it to render yet!
+		if (!bIsRendering_RenderThread)
+		{
 			return;
 		}
 
@@ -4782,10 +4998,6 @@ namespace OculusXRHMD
 				}
 			});
 
-			// TODO: Add a hook to resolve discarded frames before we start a new frame.
-			// TODO: Below check should NOT be limited to bMultiPlayer specificially even though we haven't found a non-MultiPlayer case falling into this case yet.
-			//		Remove bMultiPlayer.
-			UE_CLOG(bMultiPlayer && bIsRendering_RenderThread, LogHMD, Verbose, TEXT("Discarded previous frame and started rendering a new frame."));
 			bIsRendering_RenderThread = true;
 		}
 	}
@@ -4985,24 +5197,14 @@ namespace OculusXRHMD
 		Settings->bSupportEyeTrackedFoveatedRendering = HMDSettings->bSupportEyeTrackedFoveatedRendering;
 		Settings->SystemSplashBackground = HMDSettings->SystemSplashBackground;
 
+		Settings->BodyTrackingFidelity = HMDSettings->BodyTrackingFidelity;
+		Settings->BodyTrackingJointSet = HMDSettings->BodyTrackingJointSet;
 
 		Settings->FaceTrackingDataSource.Empty(ovrpFaceConstants_FaceTrackingDataSourcesCount);
 		Settings->FaceTrackingDataSource.Append(HMDSettings->FaceTrackingDataSource);
 	}
-
-	void FOculusXRHMD::CheckMultiPlayer()
-	{
-#if WITH_EDITOR && PLATFORM_WINDOWS
-		ULevelEditorPlaySettings* PlayInSettings = GetMutableDefault<ULevelEditorPlaySettings>();
-		check(PlayInSettings);
-		int PlayNumberOfClients = 0;
-		PlayInSettings->GetPlayNumberOfClients(PlayNumberOfClients);
-		bMultiPlayer = PlayNumberOfClients > 1;
-#endif
-	}
-
 	/// @endcond
 
 } // namespace OculusXRHMD
 
-#endif //OCULUS_HMD_SUPPORTED_PLATFORMS
+#endif // OCULUS_HMD_SUPPORTED_PLATFORMS

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "OculusXRAnchorComponent.h"
 #include "OculusXRHMDPrivate.h"
+#include "OVR_Plugin_Types.h"
 
 namespace OculusXRAnchors
 {

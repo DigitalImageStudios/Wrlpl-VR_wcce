@@ -34,10 +34,10 @@ public:
 	}
 
 	/**
-	* Returns the LiveLinkSource associated with this IOculusXRMovementModule.
-	*
-	* @return Shared pointer to the Meta MovementSDK source.
-	*/
+	 * Returns the LiveLinkSource associated with this IOculusXRMovementModule.
+	 *
+	 * @return Shared pointer to the Meta MovementSDK source.
+	 */
 	virtual TSharedPtr<class ILiveLinkSource> GetLiveLinkSource() = 0;
 
 	/**

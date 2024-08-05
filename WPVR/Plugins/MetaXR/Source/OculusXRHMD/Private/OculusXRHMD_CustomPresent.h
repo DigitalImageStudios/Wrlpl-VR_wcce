@@ -74,9 +74,9 @@ namespace OculusXRHMD
 		virtual void SubmitGPUFrameTime(float GPUFrameTime) {}
 		// This is a hack to turn force FSR off when we allocate our FDM to avoid a crash on Quest 3
 		// TODO: Remove this for UE 5.3 after there's an engine-side fix
-		virtual void UseFragmentDensityMapOverShadingRate_RHIThread(){};
+		virtual void UseFragmentDensityMapOverShadingRate_RHIThread() {};
 #ifdef WITH_OCULUS_BRANCH
-		virtual void UpdateFoveationOffsets_RHIThread(bool bUseOffsets, FIntPoint Offsets[2]){};
+		virtual void UpdateFoveationOffsets_RHIThread(bool bUseOffsets, FIntPoint Offsets[2]) {};
 #endif // WITH_OCULUS_BRANCH
 
 		bool SupportsSRGB()
@@ -114,4 +114,4 @@ namespace OculusXRHMD
 
 } // namespace OculusXRHMD
 
-#endif //OCULUS_HMD_SUPPORTED_PLATFORMS
+#endif // OCULUS_HMD_SUPPORTED_PLATFORMS

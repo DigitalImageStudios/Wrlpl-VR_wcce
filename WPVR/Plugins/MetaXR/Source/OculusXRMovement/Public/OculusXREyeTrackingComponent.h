@@ -36,8 +36,8 @@ public:
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	/**
-	* Reset the rotation values of the eyes to their initial rotation
-	*/
+	 * Reset the rotation values of the eyes to their initial rotation
+	 */
 	UFUNCTION(BlueprintCallable, Category = "Oculus|Movement")
 	void ClearRotationValues();
 
@@ -75,7 +75,7 @@ public:
 
 	/**
 	 * Bypass eye gaze state validity.
-	 * 
+	 *
 	 * @Note: It doesn't check the confidence (@see ConfidenceThreshold). The eye gaze state can be marked as invalid. This flag bypass that state flag.
 	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OculusXR|Movement")

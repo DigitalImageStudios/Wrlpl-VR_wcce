@@ -103,31 +103,31 @@ namespace OculusAssetManager_Impl
 
 	static FRenderableDevice RenderableDevices[] = {
 #if PLATFORM_ANDROID
-		//Quest 1 & 2
+		// Quest 1 & 2
 		{ ovrpNode_HandLeft, ovrpSystemHeadset_Oculus_Quest, ovrpSystemHeadset_Oculus_Quest_2, FOculusAssetDirectory::AssetListing[LeftTouchQuest2] },
 		{ ovrpNode_HandRight, ovrpSystemHeadset_Oculus_Quest, ovrpSystemHeadset_Oculus_Quest_2, FOculusAssetDirectory::AssetListing[RightTouchQuest2] },
 
-		//Quest Pro
+		// Quest Pro
 		{ ovrpNode_HandLeft, ovrpSystemHeadset_Meta_Quest_Pro, ovrpSystemHeadset_Meta_Quest_Pro, FOculusAssetDirectory::AssetListing[LeftTouchQuestPro] },
 		{ ovrpNode_HandRight, ovrpSystemHeadset_Meta_Quest_Pro, ovrpSystemHeadset_Meta_Quest_Pro, FOculusAssetDirectory::AssetListing[RightTouchQuestPro] },
 
-		//Quest 3
+		// Quest 3
 		{ ovrpNode_HandLeft, ovrpSystemHeadset_Meta_Quest_3, ovrpSystemHeadset_Meta_Quest_3, FOculusAssetDirectory::AssetListing[LeftTouchQuest3] },
 		{ ovrpNode_HandRight, ovrpSystemHeadset_Meta_Quest_3, ovrpSystemHeadset_Meta_Quest_3, FOculusAssetDirectory::AssetListing[RightTouchQuest3] },
 #else
-		//PC - Rift S
+		// PC - Rift S
 		{ ovrpNode_HandLeft, ovrpSystemHeadset_Rift_S, ovrpSystemHeadset_Rift_S, FOculusAssetDirectory::AssetListing[LeftTouchRiftS] },
 		{ ovrpNode_HandRight, ovrpSystemHeadset_Rift_S, ovrpSystemHeadset_Rift_S, FOculusAssetDirectory::AssetListing[RightTouchRiftS] },
 
-		//PC - Quest 1 & 2
+		// PC - Quest 1 & 2
 		{ ovrpNode_HandLeft, ovrpSystemHeadset_Oculus_Link_Quest, ovrpSystemHeadset_Oculus_Link_Quest_2, FOculusAssetDirectory::AssetListing[LeftTouchQuest2] },
 		{ ovrpNode_HandRight, ovrpSystemHeadset_Oculus_Link_Quest, ovrpSystemHeadset_Oculus_Link_Quest_2, FOculusAssetDirectory::AssetListing[RightTouchQuest2] },
 
-		//PC - Quest Pro
+		// PC - Quest Pro
 		{ ovrpNode_HandLeft, ovrpSystemHeadset_Meta_Link_Quest_Pro, ovrpSystemHeadset_Meta_Link_Quest_Pro, FOculusAssetDirectory::AssetListing[LeftTouchQuestPro] },
 		{ ovrpNode_HandRight, ovrpSystemHeadset_Meta_Link_Quest_Pro, ovrpSystemHeadset_Meta_Link_Quest_Pro, FOculusAssetDirectory::AssetListing[RightTouchQuestPro] },
 
-		//Quest 3
+		// Quest 3
 		{ ovrpNode_HandLeft, ovrpSystemHeadset_Meta_Link_Quest_3, ovrpSystemHeadset_Meta_Link_Quest_3, FOculusAssetDirectory::AssetListing[LeftTouchQuest3] },
 		{ ovrpNode_HandRight, ovrpSystemHeadset_Meta_Link_Quest_3, ovrpSystemHeadset_Meta_Link_Quest_3, FOculusAssetDirectory::AssetListing[RightTouchQuest3] },
 #endif

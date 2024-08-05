@@ -70,14 +70,14 @@ public:
 	TArray<FOculusXRFaceExpressionModifier> ExpressionModifiers;
 
 	/**
-	* This flag determines if the face should be updated or not during the components tick.
-	*/
+	 * This flag determines if the face should be updated or not during the components tick.
+	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OculusXR|Movement")
 	bool bUpdateFace;
 
 	/**
-	* This flag determines if the face should be modified with Expression Modifiers or not during the components tick.
-	*/
+	 * This flag determines if the face should be modified with Expression Modifiers or not during the components tick.
+	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OculusXR|Movement")
 	bool bUseModifiers;
 

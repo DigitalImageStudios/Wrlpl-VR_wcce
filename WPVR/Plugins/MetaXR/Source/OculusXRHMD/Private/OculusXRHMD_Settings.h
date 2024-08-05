@@ -82,6 +82,11 @@ namespace OculusXRHMD
 				uint64 bSceneSupportEnabled : 1;
 
 
+				/** Whether the guardian boundary visibility toggles can be used with the app */
+				uint64 bBoundaryVisibilitySupportEnabled : 1;
+
+				/** Whether the guardian boundary visibility should be suppressed by default, this can only be true if passthrough is enabled */
+				uint64 bDefaultBoundaryVisibilitySuppressed : 1;
 
 				/** Whether body tracking functionality can be used with the app */
 				uint64 bBodyTrackingEnabled : 1;
@@ -176,4 +181,4 @@ namespace OculusXRHMD
 
 } // namespace OculusXRHMD
 
-#endif //OCULUS_HMD_SUPPORTED_PLATFORMS
+#endif // OCULUS_HMD_SUPPORTED_PLATFORMS

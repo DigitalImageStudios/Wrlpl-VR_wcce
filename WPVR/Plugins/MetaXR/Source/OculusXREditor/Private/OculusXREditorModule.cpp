@@ -18,6 +18,7 @@
 #include "DetailLayoutBuilder.h"
 #include "DetailCategoryBuilder.h"
 #include "DetailWidgetRow.h"
+#include "IDetailPropertyRow.h"
 #include "GeneralProjectSettings.h"
 #include "IAssetTools.h"
 #include "Framework/MultiBox/MultiBoxBuilder.h"
@@ -29,6 +30,9 @@
 #include "OculusXRTelemetryPrivacySettings.h"
 #include "OculusXRTelemetry.h"
 #include "OculusXRTelemetryEditorEvents.h"
+#include "OculusXRBuildAnalytics.h"
+#include "OculusXRPTLayerComponentDetailsCustomization.h"
+#include "OculusXRPassthroughLayerComponent.h"
 #include "SExternalImageReference.h"
 #include "AndroidRuntimeSettings.h"
 #include "SourceControlHelpers.h"
@@ -50,6 +54,10 @@ void FOculusXREditorModule::StartupModule()
 {
 	bModuleValid = true;
 	RegisterSettings();
+
+	FPropertyEditorModule& PropertyModule = FModuleManager::LoadModuleChecked<FPropertyEditorModule>("PropertyEditor");
+	PropertyModule.RegisterCustomClassLayout(UOculusXRPassthroughLayerComponent::StaticClass()->GetFName(), FOnGetDetailCustomizationInstance::CreateStatic(&FOculusXRPTLayerComponentDetailsCustomization::MakeInstance));
+
 	FOculusAssetDirectory::LoadForCook();
 
 	if (!IsRunningCommandlet())
@@ -114,6 +122,38 @@ void FOculusXREditorModule::StartupModule()
 			FExecuteAction::CreateRaw(this, &FOculusXREditorModule::LaunchSESBedroom),
 			FCanExecuteAction());
 		PluginCommands->MapAction(
+			FOculusToolCommands::Get().Corridor,
+			FExecuteAction::CreateRaw(this, &FOculusXREditorModule::LaunchSESMoreRoomsCorridor),
+			FCanExecuteAction());
+		PluginCommands->MapAction(
+			FOculusToolCommands::Get().FurnitureFilledRoom,
+			FExecuteAction::CreateRaw(this, &FOculusXREditorModule::LaunchSESMoreRoomsFurnitureFilledRoom),
+			FCanExecuteAction());
+		PluginCommands->MapAction(
+			FOculusToolCommands::Get().HighCeilingRoom,
+			FExecuteAction::CreateRaw(this, &FOculusXREditorModule::LaunchSESMoreRoomsHighCeilingRoom),
+			FCanExecuteAction());
+		PluginCommands->MapAction(
+			FOculusToolCommands::Get().LivingRoomWithMultipleSpaces,
+			FExecuteAction::CreateRaw(this, &FOculusXREditorModule::LaunchSESMoreRoomsLivingRoomWithMultipleSpaces),
+			FCanExecuteAction());
+		PluginCommands->MapAction(
+			FOculusToolCommands::Get().LShapeRoom,
+			FExecuteAction::CreateRaw(this, &FOculusXREditorModule::LaunchSESMoreRoomsLShapeRoom),
+			FCanExecuteAction());
+		PluginCommands->MapAction(
+			FOculusToolCommands::Get().Office,
+			FExecuteAction::CreateRaw(this, &FOculusXREditorModule::LaunchSESMoreRoomsOffice),
+			FCanExecuteAction());
+		PluginCommands->MapAction(
+			FOculusToolCommands::Get().RoomWithStaircase,
+			FExecuteAction::CreateRaw(this, &FOculusXREditorModule::LaunchSESMoreRoomsRoomWithStaircase),
+			FCanExecuteAction());
+		PluginCommands->MapAction(
+			FOculusToolCommands::Get().TrapezoidalRoom,
+			FExecuteAction::CreateRaw(this, &FOculusXREditorModule::LaunchSESMoreRoomsTrapezoidalRoom),
+			FCanExecuteAction());
+		PluginCommands->MapAction(
 			FOculusToolCommands::Get().StopServer,
 			FExecuteAction::CreateRaw(this, &FOculusXREditorModule::StopSESServer),
 			FCanExecuteAction());
@@ -141,8 +181,8 @@ void FOculusXREditorModule::StartupModule()
 		// If needed, open a notification here.
 		OculusXRTelemetry::SpawnNotification();
 
-		const UGeneralProjectSettings& ProjectSettings = *GetDefault<UGeneralProjectSettings>();
-		const FString ProjectIdString = ProjectSettings.ProjectID.ToString();
+		FOculusBuildAnalytics::GetInstance();
+
 		const OculusXRTelemetry::TScopedMarker<OculusXRTelemetry::Events::FEditorStart> StartEvent;
 		bool bProjectCreatedFromMRTemplate = false;
 		FProjectStatus ProjectStatus;
@@ -150,8 +190,7 @@ void FOculusXREditorModule::StartupModule()
 		{
 			bProjectCreatedFromMRTemplate = ProjectStatus.Category == "MetaMRTemplate";
 		}
-		const auto& Annotated = StartEvent.AddAnnotation("project_hash", StringCast<ANSICHAR>(*ProjectIdString).Get())
-									.AddAnnotation("created_from_mr_template", bProjectCreatedFromMRTemplate ? "true" : "false");
+		const auto& Annotated = StartEvent.AddAnnotation("created_from_mr_template", bProjectCreatedFromMRTemplate ? "true" : "false");
 
 		UEditorPerformanceSettings* EditorPerformanceSettings = GetMutableDefault<UEditorPerformanceSettings>();
 		if (EditorPerformanceSettings->bOverrideMaxViewportRenderingResolution)
@@ -180,6 +219,7 @@ void FOculusXREditorModule::ShutdownModule()
 		FOculusToolStyle::Shutdown();
 		FOculusToolCommands::Unregister();
 		FGlobalTabmanager::Get()->UnregisterNomadTabSpawner(OculusPlatToolTabName);
+		FOculusBuildAnalytics::Shutdown();
 	}
 
 	FOculusAssetDirectory::ReleaseAll();
@@ -267,6 +307,46 @@ void FOculusXREditorModule::LaunchSESBedroom()
 	FOculusXRHMDModule::LaunchEnvironment("Bedroom");
 }
 
+void FOculusXREditorModule::LaunchSESMoreRoomsCorridor()
+{
+	FOculusXRHMDModule::LaunchMoreRoomsEnvironment("XRoom2_3");
+}
+
+void FOculusXREditorModule::LaunchSESMoreRoomsFurnitureFilledRoom()
+{
+	FOculusXRHMDModule::LaunchMoreRoomsEnvironment("XRoom2_4");
+}
+
+void FOculusXREditorModule::LaunchSESMoreRoomsHighCeilingRoom()
+{
+	FOculusXRHMDModule::LaunchMoreRoomsEnvironment("XRoom5_6");
+}
+
+void FOculusXREditorModule::LaunchSESMoreRoomsLivingRoomWithMultipleSpaces()
+{
+	FOculusXRHMDModule::LaunchMoreRoomsEnvironment("XRoom3_1");
+}
+
+void FOculusXREditorModule::LaunchSESMoreRoomsLShapeRoom()
+{
+	FOculusXRHMDModule::LaunchMoreRoomsEnvironment("XRoom5_1");
+}
+
+void FOculusXREditorModule::LaunchSESMoreRoomsOffice()
+{
+	FOculusXRHMDModule::LaunchMoreRoomsEnvironment("XRoom1_2");
+}
+
+void FOculusXREditorModule::LaunchSESMoreRoomsRoomWithStaircase()
+{
+	FOculusXRHMDModule::LaunchMoreRoomsEnvironment("XRoom1_1");
+}
+
+void FOculusXREditorModule::LaunchSESMoreRoomsTrapezoidalRoom()
+{
+	FOculusXRHMDModule::LaunchMoreRoomsEnvironment("XRoom1_4");
+}
+
 void FOculusXREditorModule::StopSESServer()
 {
 	FOculusXRHMDModule::StopServer();
@@ -347,7 +427,25 @@ void FOculusXREditorModule::CreateSESSubMenus(FMenuBuilder& MenuBuilder)
 	MenuBuilder.AddMenuEntry(FOculusToolCommands::Get().LaunchGameRoom);
 	MenuBuilder.AddMenuEntry(FOculusToolCommands::Get().LaunchLivingRoom);
 	MenuBuilder.AddMenuEntry(FOculusToolCommands::Get().LaunchBedroom);
+	MenuBuilder.AddSubMenu(
+		LOCTEXT("More Rooms", "More Rooms"),
+		LOCTEXT("More Rooms", "More Rooms"),
+		FNewMenuDelegate::CreateRaw(this, &FOculusXREditorModule::CreateSESMoreRoomsSubMenus));
 	MenuBuilder.AddMenuEntry(FOculusToolCommands::Get().StopServer);
+	MenuBuilder.EndSection();
+}
+
+void FOculusXREditorModule::CreateSESMoreRoomsSubMenus(FMenuBuilder& MenuBuilder)
+{
+	MenuBuilder.BeginSection("More Rooms", LOCTEXT("More Rooms", "More Rooms"));
+	MenuBuilder.AddMenuEntry(FOculusToolCommands::Get().Corridor);
+	MenuBuilder.AddMenuEntry(FOculusToolCommands::Get().FurnitureFilledRoom);
+	MenuBuilder.AddMenuEntry(FOculusToolCommands::Get().HighCeilingRoom);
+	MenuBuilder.AddMenuEntry(FOculusToolCommands::Get().LivingRoomWithMultipleSpaces);
+	MenuBuilder.AddMenuEntry(FOculusToolCommands::Get().LShapeRoom);
+	MenuBuilder.AddMenuEntry(FOculusToolCommands::Get().Office);
+	MenuBuilder.AddMenuEntry(FOculusToolCommands::Get().RoomWithStaircase);
+	MenuBuilder.AddMenuEntry(FOculusToolCommands::Get().TrapezoidalRoom);
 	MenuBuilder.EndSection();
 }
 
@@ -403,6 +501,7 @@ FReply FOculusXRHMDSettingsDetailsCustomization::AddSplashImage(bool text)
 
 void FOculusXRHMDSettingsDetailsCustomization::CustomizeDetails(IDetailLayoutBuilder& DetailLayout)
 {
+	static const FName WarningColorStyle("Colors.AccentYellow");
 	SavedLayoutBuilder = &DetailLayout;
 
 	// Labeled "General OculusXR" instead of "General" to enable searchability. The button "Launch Oculus Utilities Window" doesn't show up if you search for "Oculus"
@@ -435,10 +534,8 @@ void FOculusXRHMDSettingsDetailsCustomization::CustomizeDetails(IDetailLayoutBui
 			+ SHorizontalBox::Slot().FillWidth(8)
 		]
 	];
-	
+
 	IDetailCategoryBuilder& CTXPTCategoryBuilder = DetailLayout.EditCategory("System SplashScreen", FText::GetEmpty(), ECategoryPriority::Important);
-	
-	static const FName WarningColorStyle("Colors.AccentYellow");
 
 	CTXPTCategoryBuilder.AddCustomRow(LOCTEXT("CTXPTWarning", "Contextual Passthrough Warning"))
 	.Visibility(TAttribute<EVisibility>(this, &FOculusXRHMDSettingsDetailsCustomization::GetContextualPassthroughWarningVisibility))
@@ -502,7 +599,7 @@ void FOculusXRHMDSettingsDetailsCustomization::CustomizeDetails(IDetailLayoutBui
 	const FString AutomaticImagePath = EngineAndroidPath / LaunchImageLandscape.IconPath;
 	const FString TargetImagePath = GameAndroidPath / LaunchImageLandscape.IconPath;
 	const FVector2D LaunchImageMaxSize(150.0f, 150.0f);
-	
+
 	CTXPTCategoryBuilder.AddCustomRow(LaunchImageLandscape.IconName)
 		.IsEnabled(TAttribute<bool>(this, &FOculusXRHMDSettingsDetailsCustomization::IsLaunchImageEnabled))
 		.NameContent()
@@ -559,6 +656,33 @@ void FOculusXRHMDSettingsDetailsCustomization::CustomizeDetails(IDetailLayoutBui
 						]
 				]
 		];
+
+	TArray<TSharedRef<IPropertyHandle>> DefaultProperties;
+	CTXPTCategoryBuilder.GetDefaultProperties(DefaultProperties);
+
+	for (TSharedRef<IPropertyHandle> PropertyHandle : DefaultProperties)
+	{
+		CTXPTCategoryBuilder.AddProperty(PropertyHandle);
+
+		if (PropertyHandle->GetProperty()->GetFName() == GET_MEMBER_NAME_CHECKED(UOculusXRHMDRuntimeSettings, SystemSplashBackground))
+		{
+			CTXPTCategoryBuilder.AddCustomRow(LOCTEXT("SystemSplashBackgroundDeprecate", "Deprecate System Splash Background"))
+				.Visibility(TAttribute<EVisibility>(this, &FOculusXRHMDSettingsDetailsCustomization::GetSystemSplashBackgroundDeprecationMessageVisibility))
+				[
+					SNew(SVerticalBox)
+						+SVerticalBox::Slot().FillHeight(1.f).VAlign(EVerticalAlignment::VAlign_Center)
+						[
+							SNew(STextBlock)
+								.Font(IDetailLayoutBuilder::GetDetailFont())
+								.AutoWrapText(true)
+								.Justification(ETextJustify::Center)
+								.Text(LOCTEXT("SystemSplashDeprecationWarningText", "Soon Black background will be prohibited for MR apps. Consider using Passthrough (Contextual)."))
+								.ColorAndOpacity(FAppStyle::Get().GetSlateColor(WarningColorStyle))
+						]
+				];
+		}
+	}
+
 	/* clang-format on */
 }
 
@@ -609,6 +733,12 @@ EVisibility FOculusXRHMDSettingsDetailsCustomization::GetSystemSplashImageWarnin
 	IFileManager& FileManager = IFileManager::Get();
 
 	return !FileManager.FileExists(*VRSplashPath) ? EVisibility::Visible : EVisibility::Collapsed;
+}
+
+EVisibility FOculusXRHMDSettingsDetailsCustomization::GetSystemSplashBackgroundDeprecationMessageVisibility() const
+{
+	UOculusXRHMDRuntimeSettings* OculusSettings = GetMutableDefault<UOculusXRHMDRuntimeSettings>();
+	return OculusSettings->bInsightPassthroughEnabled && OculusSettings->SystemSplashBackground == ESystemSplashBackgroundType::Black ? EVisibility::Visible : EVisibility::Collapsed;
 }
 
 //////////////////////////////////////////////////////////////////////////

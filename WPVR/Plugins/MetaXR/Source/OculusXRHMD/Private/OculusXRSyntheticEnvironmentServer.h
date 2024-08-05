@@ -14,6 +14,8 @@ class FMetaXRSES
 {
 public:
 	static void LaunchEnvironment(FString EnvironmentName);
+	static void LaunchMoreRoomsEnvironment(FString EnvironmentName);
+	static void LaunchEnvironment(FString EnvironmentName, FString SESPath);
 	static void StopServer();
 
 private:
@@ -23,6 +25,7 @@ private:
 
 	static FString GetMetaXRSimPackagePath();
 	static FString GetSynthEnvServerPath();
+	static FString GetSynthEnvServerMoreRoomsPath();
 	static FString GetLocalSharingServerPath();
 
 	static FProcHandle EnvProcHandle;

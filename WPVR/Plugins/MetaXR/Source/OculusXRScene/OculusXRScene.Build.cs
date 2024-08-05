@@ -3,35 +3,35 @@
 
 namespace UnrealBuildTool.Rules
 {
-	public class OculusXRScene : ModuleRules
-	{
-		public OculusXRScene(ReadOnlyTargetRules Target) : base(Target)
-		{
-			bUseUnity = true;
+    public class OculusXRScene : ModuleRules
+    {
+        public OculusXRScene(ReadOnlyTargetRules Target) : base(Target)
+        {
+            bUseUnity = true;
 
-			PrivateDependencyModuleNames.AddRange(
-				new string[]
-				{
-					"Core",
-					"CoreUObject",
-					"Engine",
-					"OculusXRHMD",
-					"OculusXRAnchors",
-					"OVRPluginXR",
-					"ProceduralMeshComponent",
-				});
+            PrivateDependencyModuleNames.AddRange(
+                new string[]
+                {
+                    "Core",
+                    "CoreUObject",
+                    "Engine",
+                    "OculusXRHMD",
+                    "OculusXRAnchors",
+                    "OVRPluginXR",
+                    "ProceduralMeshComponent",
+                });
 
-			PrivateIncludePaths.AddRange(
-				new string[] {
+            PrivateIncludePaths.AddRange(
+                new string[] {
 					// Relative to Engine\Plugins\Runtime\Oculus\OculusVR\Source
 					"OculusXRHMD/Private",
-					"OculusXRAnchors/Private"
-				});
+                    "OculusXRAnchors/Private"
+                });
 
-			PublicIncludePaths.AddRange(
-				new string[] {
-					"Runtime/Engine/Classes/Components",
-				});
-		}
-	}
+            PublicIncludePaths.AddRange(
+                new string[] {
+                    "Runtime/Engine/Classes/Components",
+                });
+        }
+    }
 }

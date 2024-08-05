@@ -29,14 +29,14 @@ public:
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	/**
-	* Restore all bones to their initial transforms
-	*/
+	 * Restore all bones to their initial transforms
+	 */
 	UFUNCTION(BlueprintCallable, Category = "OculusXR|Movement")
 	void ResetAllBoneTransforms();
 
 	/**
-	* How are the results of body tracking applied to the mesh.
-	*/
+	 * How are the results of body tracking applied to the mesh.
+	 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "OculusXR|Movement")
 	EOculusXRBodyTrackingMode BodyTrackingMode;
 

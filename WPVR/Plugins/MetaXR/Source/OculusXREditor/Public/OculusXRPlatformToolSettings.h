@@ -77,7 +77,7 @@ struct FOculusXRAssetConfigArray
 };
 
 /**
- * 
+ *
  */
 UCLASS(config = Editor)
 class OCULUSXREDITOR_API UOculusXRPlatformToolSettings : public UObject

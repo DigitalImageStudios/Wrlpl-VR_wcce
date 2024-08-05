@@ -26,6 +26,7 @@
 #include "OVRPlatformModels.generated.h"
 
 
+/** A video recording evidence collected as part of the abuse report. */
 USTRUCT(BlueprintType, Category = "OvrPlatform|Models|AbuseReportRecording")
 struct OVRPLATFORM_API FOvrAbuseReportRecording
 {
@@ -131,23 +132,36 @@ public:
 };
 
 
+/**
+ * The unlock progress of a particular achievement.  See
+ * [Achievements](https://developer.oculus.com/documentation/native/ps-achievements/)
+ * for more information.
+ */
 USTRUCT(BlueprintType, Category = "OvrPlatform|Models|AchievementProgress")
 struct OVRPLATFORM_API FOvrAchievementProgress
 {
     GENERATED_USTRUCT_BODY()
 
+    /** For bitfield achievements, the current bitfield state. */
     UPROPERTY(BlueprintReadOnly, Category = "OvrPlatform|Models|AchievementProgress|Field")
     FString Bitfield;
 
+    /** For count achievements, the current counter state. */
     UPROPERTY(BlueprintReadOnly, Category = "OvrPlatform|Models|AchievementProgress|Field")
     int64 Count;
 
+    /** If the user has already unlocked this achievement. */
     UPROPERTY(BlueprintReadOnly, Category = "OvrPlatform|Models|AchievementProgress|Field")
     bool IsUnlocked;
 
+    /**
+     * The unique string that you use to reference the achievement
+     * in your app, as specified in the developer dashboard.
+     */
     UPROPERTY(BlueprintReadOnly, Category = "OvrPlatform|Models|AchievementProgress|Field")
     FString Name;
 
+    /** If the achievement is unlocked, the time when it was unlocked. */
     UPROPERTY(BlueprintReadOnly, Category = "OvrPlatform|Models|AchievementProgress|Field")
     FDateTime UnlockTime;
 
@@ -236,6 +250,10 @@ struct OVRPLATFORM_API FOvrAchievementUpdate
 };
 
 
+/**
+ * Represents the result of CheckAppDownloadProgress API. This can be used
+ * to check the progress and the status of an ongoing app download operation.
+ */
 USTRUCT(BlueprintType, Category = "OvrPlatform|Models|AppDownloadProgressResult")
 struct OVRPLATFORM_API FOvrAppDownloadProgressResult
 {
@@ -267,10 +285,15 @@ struct OVRPLATFORM_API FOvrAppDownloadProgressResult
 };
 
 
+/** Represents the result of a Application_StartAppDownload(), Application_CancelAppDownload() or Application_InstallAppUpdateAndRelaunch() API call. */
 USTRUCT(BlueprintType, Category = "OvrPlatform|Models|AppDownloadResult")
 struct OVRPLATFORM_API FOvrAppDownloadResult
 {
     GENERATED_USTRUCT_BODY()
+
+    /** Result of the download or install operation returned by the installer */
+    UPROPERTY(BlueprintReadOnly, Category = "OvrPlatform|Models|AppDownloadResult|Field")
+    EOvrAppInstallResult AppInstallResult;
 
     /** Timestamp in milliseconds when the operation finished. */
     UPROPERTY(BlueprintReadOnly, Category = "OvrPlatform|Models|AppDownloadResult|Field")
@@ -290,28 +313,39 @@ struct OVRPLATFORM_API FOvrAppDownloadResult
 };
 
 
+/** Represents the version information for an application. */
 USTRUCT(BlueprintType, Category = "OvrPlatform|Models|ApplicationVersion")
 struct OVRPLATFORM_API FOvrApplicationVersion
 {
     GENERATED_USTRUCT_BODY()
 
+    /** Version code number for the version of the application currently installed on the device. */
     UPROPERTY(BlueprintReadOnly, Category = "OvrPlatform|Models|ApplicationVersion|Field")
     int32 CurrentCode;
 
+    /** Version name string for the version of the application currently installed on the device. */
     UPROPERTY(BlueprintReadOnly, Category = "OvrPlatform|Models|ApplicationVersion|Field")
     FString CurrentName;
 
+    /**
+     * Version code number of the latest update of the application. This may
+     * or may not be currently installed on the device.
+     */
     UPROPERTY(BlueprintReadOnly, Category = "OvrPlatform|Models|ApplicationVersion|Field")
     int32 LatestCode;
 
+    /**
+     * Version name string of the latest update of the application. This may
+     * or may not be currently installed on the device.
+     */
     UPROPERTY(BlueprintReadOnly, Category = "OvrPlatform|Models|ApplicationVersion|Field")
     FString LatestName;
 
-    /** Seconds since epoch when the latest app update was released */
+    /** Seconds since epoch when the latest application update was released. */
     UPROPERTY(BlueprintReadOnly, Category = "OvrPlatform|Models|ApplicationVersion|Field")
     int64 ReleaseDate;
 
-    /** Size of the app update in bytes */
+    /** Size of the latest application update in bytes. */
     UPROPERTY(BlueprintReadOnly, Category = "OvrPlatform|Models|ApplicationVersion|Field")
     FString Size;
 
@@ -329,6 +363,10 @@ struct OVRPLATFORM_API FOvrApplicationVersion
 };
 
 
+/**
+ * An AssetFileDeleteResult contains the result of a deleted asset file.
+ * It contains the asset file ID, the file path, and success status of the deleted asset.
+ */
 USTRUCT(BlueprintType, Category = "OvrPlatform|Models|AssetFileDeleteResult")
 struct OVRPLATFORM_API FOvrAssetFileDeleteResult
 {
@@ -364,6 +402,7 @@ struct OVRPLATFORM_API FOvrAssetFileDeleteResult
 };
 
 
+/** An AssetFileDownloadCancelResult represents the result of a cancelled download action of an asset file. It contains the asset file ID, the file path, and success status of the cancelled download. */
 USTRUCT(BlueprintType, Category = "OvrPlatform|Models|AssetFileDownloadCancelResult")
 struct OVRPLATFORM_API FOvrAssetFileDownloadCancelResult
 {
@@ -399,6 +438,10 @@ struct OVRPLATFORM_API FOvrAssetFileDownloadCancelResult
 };
 
 
+/**
+ * An AssetFileDownloadResult represents an asset that has been successfully downloaded.
+ * It contains the asset file ID and the file path of the downloaded asset.
+ */
 USTRUCT(BlueprintType, Category = "OvrPlatform|Models|AssetFileDownloadResult")
 struct OVRPLATFORM_API FOvrAssetFileDownloadResult
 {
@@ -426,6 +469,10 @@ struct OVRPLATFORM_API FOvrAssetFileDownloadResult
 };
 
 
+/**
+ * An AssetFileDownloadUpdate represents the download status of an update for an asset file.
+ * It contains the asset file ID, the download progress of the update, and its completion status.
+ */
 USTRUCT(BlueprintType, Category = "OvrPlatform|Models|AssetFileDownloadUpdate")
 struct OVRPLATFORM_API FOvrAssetFileDownloadUpdate
 {
@@ -992,6 +1039,10 @@ struct OVRPLATFORM_API FOvrLanguagePackInfo
 };
 
 
+/**
+ * An AssetDetails object contains detailed metadata for an asset file, including the asset file ID,
+ * file path, asset type, and additional metadata that characterizes the asset.
+ */
 USTRUCT(BlueprintType, Category = "OvrPlatform|Models|AssetDetails")
 struct OVRPLATFORM_API FOvrAssetDetails
 {
@@ -1049,6 +1100,7 @@ struct OVRPLATFORM_API FOvrAssetDetails
 };
 
 
+/** Results of the launched block dialog including user actions. */
 USTRUCT(BlueprintType, Category = "OvrPlatform|Models|LaunchBlockFlowResult")
 struct OVRPLATFORM_API FOvrLaunchBlockFlowResult
 {
@@ -1103,6 +1155,7 @@ struct OVRPLATFORM_API FOvrLaunchFriendRequestFlowResult
 };
 
 
+/** Results of the launched report dialog including resulting report ID and user action. */
 USTRUCT(BlueprintType, Category = "OvrPlatform|Models|LaunchReportFlowResult")
 struct OVRPLATFORM_API FOvrLaunchReportFlowResult
 {
@@ -1112,6 +1165,7 @@ struct OVRPLATFORM_API FOvrLaunchReportFlowResult
     UPROPERTY(BlueprintReadOnly, Category = "OvrPlatform|Models|LaunchReportFlowResult|Field")
     bool DidCancel;
 
+    /** ID of the report created by the user. */
     UPROPERTY(BlueprintReadOnly, Category = "OvrPlatform|Models|LaunchReportFlowResult|Field")
     FOvrId UserReportId;
 
@@ -1129,6 +1183,7 @@ struct OVRPLATFORM_API FOvrLaunchReportFlowResult
 };
 
 
+/** Results of the launched unblock dialog including user actions. */
 USTRUCT(BlueprintType, Category = "OvrPlatform|Models|LaunchUnblockFlowResult")
 struct OVRPLATFORM_API FOvrLaunchUnblockFlowResult
 {
@@ -2500,6 +2555,7 @@ struct OVRPLATFORM_API FOvrSendInvitesResult
 };
 
 
+/** A UserAccountAgeCategory contains the age category for a Meta user. */
 USTRUCT(BlueprintType, Category = "OvrPlatform|Models|UserAccountAgeCategory")
 struct OVRPLATFORM_API FOvrUserAccountAgeCategory
 {

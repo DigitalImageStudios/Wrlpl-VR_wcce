@@ -17,9 +17,17 @@ void FOculusToolCommands::RegisterCommands()
 
 	UI_COMMAND(ToggleMetaXRSim, "Meta XR Simulator", "Activate/Deactivate Meta XR Simulator", EUserInterfaceActionType::ToggleButton, FInputChord());
 
-	UI_COMMAND(LaunchGameRoom, "Launch GameRoom", "Launch GameRoom", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(LaunchGameRoom, "Launch Game Room", "Launch Game Room", EUserInterfaceActionType::Button, FInputChord());
 	UI_COMMAND(LaunchLivingRoom, "Launch Living Room", "Launch Living Room", EUserInterfaceActionType::Button, FInputChord());
 	UI_COMMAND(LaunchBedroom, "Launch Bedroom", "Launch Bedroom", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(Corridor, "Launch Corridor", "Launch Corridor", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(FurnitureFilledRoom, "Launch Furniture-filled Room", "Launch Furniture-filled Room", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(HighCeilingRoom, "Launch High-ceiling Room", "Launch High-ceiling Room", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(LivingRoomWithMultipleSpaces, "Launch Living Room with Multiple Spaces", "Launch Living Room with Multiple Spaces", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(LShapeRoom, "Launch L-shape Room", "Launch L-shape Room", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(Office, "Launch Office", "Launch Office", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(RoomWithStaircase, "Launch Room with Staircase", "Launch Room with Staircase", EUserInterfaceActionType::Button, FInputChord());
+	UI_COMMAND(TrapezoidalRoom, "Launch Trapezoidal Room", "Launch Trapezoidal Room", EUserInterfaceActionType::Button, FInputChord());
 	UI_COMMAND(StopServer, "Stop Server", "Stop Server", EUserInterfaceActionType::Button, FInputChord());
 }
 

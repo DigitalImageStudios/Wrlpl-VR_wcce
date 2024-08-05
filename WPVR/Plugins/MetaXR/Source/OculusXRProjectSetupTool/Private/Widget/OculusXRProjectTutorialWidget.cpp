@@ -1,7 +1,5 @@
 // Copyright (c) Meta Platforms, Inc. and affiliates.
 
-#pragma once
-
 #include "OculusXRProjectTutorialWidget.h"
 
 #include "OculusXRProjectSetupToolModule.h"

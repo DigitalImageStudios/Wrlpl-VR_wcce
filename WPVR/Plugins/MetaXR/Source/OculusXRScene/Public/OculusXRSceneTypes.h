@@ -12,3 +12,10 @@ public:
 };
 
 
+UENUM(BlueprintType)
+enum class EOculusXRBoundaryVisibility : uint8
+{
+	Invalid = 0,
+	NotSuppressed = 1,
+	Suppressed = 2
+};

@@ -21,16 +21,16 @@ DECLARE_CYCLE_STAT(TEXT("GPUStressRendering"), STAT_GPUStressRendering, STATGROU
 // Uniform buffers
 //-------------------------------------------------------------------------------------------------
 
-//This buffer should contain variables that never, or rarely change
+// This buffer should contain variables that never, or rarely change
 BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FOculusPixelShaderConstantParameters, )
-//SHADER_PARAMETER(FVector4, Name)
+// SHADER_PARAMETER(FVector4, Name)
 END_GLOBAL_SHADER_PARAMETER_STRUCT()
 
 IMPLEMENT_GLOBAL_SHADER_PARAMETER_STRUCT(FOculusPixelShaderConstantParameters, "PSConstants");
 
 typedef TUniformBufferRef<FOculusPixelShaderConstantParameters> FOculusPixelShaderConstantParametersRef;
 
-//This buffer is for variables that change very often (each frame for example)
+// This buffer is for variables that change very often (each frame for example)
 BEGIN_GLOBAL_SHADER_PARAMETER_STRUCT(FOculusPixelShaderVariableParameters, )
 SHADER_PARAMETER(int, IterationsMultiplier)
 END_GLOBAL_SHADER_PARAMETER_STRUCT()

@@ -25,10 +25,15 @@
 #include "Misc/OutputDeviceNull.h"
 #include "Misc/CommandLine.h"
 #include "OVRPlatform.h"
+#include "Runtime/Launch/Resources/Version.h"
+
+#include "Engine/GameInstance.h"
 
 #include <string>
 
 #define TICK_SUBSYSTEM true
+
+bool UOvrPlatformSubsystem::bFirstInstanceInit = true;
 
 void UOvrPlatformSubsystem::StartMessagePump()
 {
@@ -152,6 +157,9 @@ void UOvrPlatformSubsystem::Deinitialize()
 {
     UE_LOG(LogOvrPlatform, Display, TEXT("UOvrPlatformSubsystem::Deinitialize"));
 
+    // Reset first instance init condition
+    bFirstInstanceInit = true;
+
     // Detaching message handlers
     GetNotifDelegate(ovrMessage_Notification_AbuseReport_ReportButtonPressed).RemoveAll(this);
     GetNotifDelegate(ovrMessage_Notification_ApplicationLifecycle_LaunchIntentChanged).RemoveAll(this);
@@ -192,6 +200,31 @@ void UOvrPlatformSubsystem::NotifyGameInstanceThatSubsystemStarted(bool bOculusP
 #if PLATFORM_WINDOWS
 bool UOvrPlatformSubsystem::InitWithWindowsPlatform()
 {
+#if ENGINE_MAJOR_VERSION == 5
+#if WITH_EDITOR
+    if (bFirstInstanceInit) {
+        // Raise warning when running multiplayer with "Run Under One Process" enabled
+        ULevelEditorPlaySettings* PlaySettings = GetMutableDefault<ULevelEditorPlaySettings>();
+        if (PlaySettings != nullptr)
+        {
+            int32 NumberOfClients = 0;
+            PlaySettings->GetPlayNumberOfClients(NumberOfClients);
+            bool bRunUnderOneProcess = false;
+            PlaySettings->GetRunUnderOneProcess(bRunUnderOneProcess);
+
+			if (NumberOfClients > 1 && bRunUnderOneProcess) {
+				FString InProcSupportMessage;
+				InProcSupportMessage += TEXT("Meta Platform SDK is not supported when 'Run Under One Process' is enabled in Multiplayer testing \n \n");
+				InProcSupportMessage += TEXT("Meta Platform SDK is not supported when 'Run Under One Process' is enabled in Multiplayer testing \n");
+				InProcSupportMessage += TEXT("All spawned players will use the same Platform user. Use multiprocess mode to enable multiple users \n");
+				InProcSupportMessage += TEXT("To change to multiprocess mode, go to Editor Preferences->Level Editor->Play, disable Run Under One Process \n ");
+				UE_LOG(LogOvrPlatform, Error, TEXT("%s"), *InProcSupportMessage);
+			}
+        }
+    }
+#endif
+#endif
+
     UE_LOG(LogOvrPlatform, Verbose, TEXT("UOvrPlatformSubsystem::InitWithWindowsPlatform()"));
 
     auto OculusAppId = GetAppId();
@@ -279,6 +312,10 @@ bool UOvrPlatformSubsystem::InitWithWindowsPlatform()
             return false;
         }
 #endif
+    }
+
+    if (bFirstInstanceInit) {
+        bFirstInstanceInit = false;
     }
 
     return true;

@@ -2,11 +2,12 @@
 
 #include "OculusXRPassthroughXR.h"
 
+#include "Engine/GameEngine.h"
 #include "IOpenXRHMDModule.h"
-#include "XRThreadUtils.h"
-
 #include "OculusXRHMDRuntimeSettings.h"
 #include "OculusXRPassthroughXRFunctions.h"
+#include "StereoRendering.h"
+#include "XRThreadUtils.h"
 
 #define LOCTEXT_NAMESPACE "OculusXRPassthrough"
 
@@ -30,7 +31,7 @@ namespace XRPassthrough
 
 	void FPassthroughXR::RegisterAsOpenXRExtension()
 	{
-#if defined(WITH_OCULUS_BRANCH) && 0
+#if defined(WITH_OCULUS_BRANCH) && defined(WITH_OCULUS_OPENXR_NATIVE)
 		// Feature not enabled on Marketplace build. Currently only for the meta fork
 		RegisterOpenXRExtensionModularFeature();
 #endif

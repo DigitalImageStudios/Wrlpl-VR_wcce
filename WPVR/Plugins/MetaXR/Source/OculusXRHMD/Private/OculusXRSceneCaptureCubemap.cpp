@@ -112,7 +112,7 @@ void UOculusXRSceneCaptureCubemap::Tick(float DeltaTime)
 		return;
 	}
 
-	//Read Whole Capture Buffer
+	// Read Whole Capture Buffer
 	IImageWrapperModule& ImageWrapperModule = FModuleManager::LoadModuleChecked<IImageWrapperModule>(FName("ImageWrapper"));
 	TSharedPtr<IImageWrapper> ImageWrapper = ImageWrapperModule.CreateImageWrapper(EImageFormat::PNG);
 

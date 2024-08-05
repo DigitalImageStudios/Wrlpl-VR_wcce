@@ -320,7 +320,11 @@ void FOculusXRMRModule::ChangeCaptureState()
 			IStereoRenderTargetManager* const StereoRenderTargetManager = GEngine->StereoRenderingDevice->GetRenderTargetManager();
 			if (StereoRenderTargetManager)
 			{
+#ifdef WITH_OCULUS_BRANCH
+				StereoRenderTargetManager->CalculateRenderTargetSize(maxWidth, maxHeight);
+#else  // WITH_OCULUS_BRANCH
 				StereoRenderTargetManager->CalculateRenderTargetSize(*(FViewport*)GEngine->GameViewport->GetGameViewport(), maxWidth, maxHeight);
+#endif // WITH_OCULUS_BRANCH
 			}
 			maxWidth *= 2;
 			frameWidth = frameWidth > maxWidth ? maxWidth : frameWidth;

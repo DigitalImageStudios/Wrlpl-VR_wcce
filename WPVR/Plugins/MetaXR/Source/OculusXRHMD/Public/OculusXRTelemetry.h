@@ -3,6 +3,8 @@
 #pragma once
 
 #include "OculusXRQPL.h"
+#include "Containers/StringConv.h"
+#include "Templates/Function.h"
 
 namespace OculusXRTelemetry
 {
@@ -15,6 +17,8 @@ namespace OculusXRTelemetry
 	OCULUSXRHMD_API bool IsActive();
 	OCULUSXRHMD_API void IfActiveThen(TUniqueFunction<void()> Function);
 	OCULUSXRHMD_API void PropagateTelemetryConsent();
+
+	OCULUSXRHMD_API FString GetProjectId();
 
 	template <typename Backend = FTelemetryBackend>
 	class OCULUSXRHMD_API TMarkerPoint : FNoncopyable
@@ -116,6 +120,10 @@ namespace OculusXRTelemetry
 				{
 					const auto& Self = Start();
 				}
+
+				const FString ProjectIdString = GetProjectId();
+				const auto& AnnotatedWithProjectId = AddAnnotation("project_hash", StringCast<ANSICHAR>(*ProjectIdString).Get());
+
 			}
 		}
 		~TScopedMarker()

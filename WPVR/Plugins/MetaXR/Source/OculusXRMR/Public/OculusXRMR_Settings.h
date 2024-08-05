@@ -46,10 +46,10 @@ public:
 	UOculusXRMR_Settings(const FObjectInitializer& ObjectInitializer);
 
 	/** Specify the distance to the camera which divide the background and foreground in MxR casting.
-	  * Set it to CR_TrackingReference to use the distance to the Tracking Reference, which works better
-	  * in the stationary experience. Set it to CR_Head would use the distance to the HMD, which works better
-	  * in the room scale experience.
-	  */
+	 * Set it to CR_TrackingReference to use the distance to the Tracking Reference, which works better
+	 * in the stationary experience. Set it to CR_Head would use the distance to the HMD, which works better
+	 * in the room scale experience.
+	 */
 	UPROPERTY(Category = MetaXR, EditAnywhere, BlueprintReadWrite)
 	EOculusXRMR_ClippingReference ClippingReference;
 
@@ -66,7 +66,7 @@ public:
 	int HeightPerView;
 
 	/** When CompositionMethod is External Composition, the latency of the casting output which could be adjusted to
-	  * match the camera latency in the external composition application */
+	 * match the camera latency in the external composition application */
 	UPROPERTY(Category = MetaXR, EditAnywhere, BlueprintReadWrite, meta = (UIMin = "0.0", UIMax = "0.1"))
 	float CastingLatency;
 
@@ -75,7 +75,7 @@ public:
 	FColor BackdropColor;
 
 	/** When CompositionMethod is Direct Composition, you could adjust this latency to delay the virtual
-	* hand movement by a small amount of time to match the camera latency */
+	 * hand movement by a small amount of time to match the camera latency */
 	UPROPERTY(meta = (DeprecatedProperty, DeprecationMessage = "Direct Composition deprecated."))
 	float HandPoseStateLatency_DEPRECATED;
 
@@ -100,14 +100,14 @@ public:
 	EOculusXRMR_PostProcessEffects ExternalCompositionPostProcessEffects;
 
 	/** ExternalComposition: The casting window includes the background and foreground view
-	  * DirectComposition: The game scene would be composited with the camera frame directly
-	  */
+	 * DirectComposition: The game scene would be composited with the camera frame directly
+	 */
 	UFUNCTION(BlueprintCallable, Category = MetaXR)
 	EOculusXRMR_CompositionMethod GetCompositionMethod() { return CompositionMethod; }
 
 	/** ExternalComposition: The casting window includes the background and foreground view
-	  * DirectComposition: The game scene would be composited with the camera frame directly
-	  */
+	 * DirectComposition: The game scene would be composited with the camera frame directly
+	 */
 	UFUNCTION(BlueprintCallable, Category = MetaXR)
 	void SetCompositionMethod(EOculusXRMR_CompositionMethod val);
 
@@ -128,8 +128,8 @@ public:
 	void SetIsCasting(bool val);
 
 	/** Bind the casting camera to the calibrated external camera.
-	  * (Requires a calibrated external camera)
-	  */
+	 * (Requires a calibrated external camera)
+	 */
 	UFUNCTION(BlueprintCallable, Category = MetaXR)
 	void BindToTrackedCameraIndexIfAvailable(int InTrackedCameraIndex);
 
@@ -150,8 +150,8 @@ private:
 	bool bIsCasting;
 
 	/** ExternalComposition: The casting window includes the background and foreground view
-	  * DirectComposition: The game scene would be composited with the camera frame directly
-	  */
+	 * DirectComposition: The game scene would be composited with the camera frame directly
+	 */
 	UPROPERTY()
 	EOculusXRMR_CompositionMethod CompositionMethod;
 

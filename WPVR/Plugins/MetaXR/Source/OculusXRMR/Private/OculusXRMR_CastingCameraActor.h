@@ -23,8 +23,8 @@ class UOculusXRMR_Settings;
 class UOculusXRMR_State;
 
 /**
-* The camera actor in the level that tracks the binded physical camera in game
-*/
+ * The camera actor in the level that tracks the binded physical camera in game
+ */
 UCLASS(ClassGroup = OculusXRMR, NotPlaceable, NotBlueprintable)
 class AOculusXRMR_CastingCameraActor : public ASceneCapture2D
 {
