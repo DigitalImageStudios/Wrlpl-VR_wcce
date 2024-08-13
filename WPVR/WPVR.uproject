@@ -60,6 +60,16 @@
 		{
 			"Name": "GPULightmass",
 			"Enabled": false
+		},
+		{
+			"Name": "OpenXR",
+			"Enabled": true,
+			"SupportedTargetPlatforms": [
+				"Win64",
+				"Linux",
+				"Android",
+				"VisionOS"
+			]
 		}
 	]
 }
