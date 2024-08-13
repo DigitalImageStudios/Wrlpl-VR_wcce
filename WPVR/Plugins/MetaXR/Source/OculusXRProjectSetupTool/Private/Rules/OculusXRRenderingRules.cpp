@@ -10,6 +10,7 @@
 #include "OculusXRRuleProcessorSubsystem.h"
 #include "Engine/PostProcessVolume.h"
 #include "Engine/RendererSettings.h"
+#include "Misc/EngineVersionComparison.h"
 
 namespace OculusXRRenderingRules
 {
@@ -89,6 +90,19 @@ namespace OculusXRRenderingRules
 		OutShouldRestartEditor = true;
 	}
 
+	bool FEnablePCForwardShadingRule::IsApplied() const
+	{
+		const URendererSettings* Settings = GetMutableDefault<URendererSettings>();
+
+		return Settings->bForwardShading;
+	}
+
+	void FEnablePCForwardShadingRule::ApplyImpl(bool& OutShouldRestartEditor)
+	{
+		OCULUSXR_UPDATE_SETTINGS(URendererSettings, bForwardShading, true);
+		OutShouldRestartEditor = true;
+	}
+
 	bool FEnableMSAARule::IsApplied() const
 	{
 		const URendererSettings* Settings = GetMutableDefault<URendererSettings>();
@@ -142,6 +156,17 @@ namespace OculusXRRenderingRules
 	{
 		OCULUSXR_UPDATE_SETTINGS(UOculusXRHMDRuntimeSettings, bDynamicResolution, true);
 		OutShouldRestartEditor = false;
+	}
+
+	bool FEnableMobileUniformLocalLightsRule::IsApplied() const
+	{
+		return GetMutableDefault<URendererSettings>()->bMobileUniformLocalLights;
+	}
+
+	void FEnableMobileUniformLocalLightsRule::ApplyImpl(bool& OutShouldRestartEditor)
+	{
+		OCULUSXR_UPDATE_SETTINGS(URendererSettings, bMobileUniformLocalLights, true);
+		OutShouldRestartEditor = true;
 	}
 #endif
 
@@ -263,13 +288,39 @@ namespace OculusXRRenderingRules
 		OutShouldRestartEditor = true;
 	}
 
+	bool FDisableMobileShaderAllowMovableDirectionalLightsRule::IsValid()
+	{
+		const UOculusXRRuleProcessorSubsystem* RuleProcessorSubsystem = GEngine->GetEngineSubsystem<UOculusXRRuleProcessorSubsystem>();
+		return !RuleProcessorSubsystem->DynamicLightsExistInProject();
+	}
+
+	bool FDisableMobileGPUSceneRule::IsApplied() const
+	{
+		return !GetMutableDefault<URendererSettings>()->bMobileSupportGPUScene;
+	}
+
+	void FDisableMobileGPUSceneRule::ApplyImpl(bool& OutShouldRestartEditor)
+	{
+		OCULUSXR_UPDATE_SETTINGS(URendererSettings, bMobileSupportGPUScene, false);
+		OutShouldRestartEditor = true;
+	}
+
+	// Only disable UE5.3 and below. UE5.4 reimplements GPUScene for mobile, more research is needed.
+	bool FDisableMobileGPUSceneRule::IsValid()
+	{
+#if UE_VERSION_OLDER_THAN(5, 4, 0)
+		return true;
+#endif // UE_VERSION_OLDER_THAN(5, 4, 0)
+		return false;
+	}
+
 	FUseAndroidVulkanPreviewPlatform::FUseAndroidVulkanPreviewPlatform()
 		: ISetupRule("Rendering_UseAndroidVulkanPreviewPlatform",
-			NSLOCTEXT("OculusXRRenderingRules", "UseAndroidVulkanPreviewPlatform_DisplayName", "Use Android Vulkan Preview Platform"),
-			NSLOCTEXT("OculusXRRenderingRules", "UseAndroidVulkanPreviewPlatform_Description", "Android Vulkan Mobile Preview Platform is necessery for correct behaviour of passthrough over Link."),
-			ESetupRuleCategory::Rendering,
-			ESetupRuleSeverity::Warning,
-			ESetupRulePlatform::MetaLink)
+			  NSLOCTEXT("OculusXRRenderingRules", "UseAndroidVulkanPreviewPlatform_DisplayName", "Use Android Vulkan Preview Platform"),
+			  NSLOCTEXT("OculusXRRenderingRules", "UseAndroidVulkanPreviewPlatform_Description", "Android Vulkan Mobile Preview Platform is necessery for correct behaviour of passthrough over Link."),
+			  ESetupRuleCategory::Rendering,
+			  ESetupRuleSeverity::Warning,
+			  ESetupRulePlatform::MetaLink)
 	{
 		AndroidVulkanPreview = GetAndroidPreviewPlatformInfo();
 	}
@@ -293,11 +344,5 @@ namespace OculusXRRenderingRules
 	void FUseAndroidVulkanPreviewPlatform::ApplyImpl(bool& OutShouldRestartEditor)
 	{
 		GEditor->SetPreviewPlatform(AndroidVulkanPreview, true);
-	}
-
-	bool FDisableMobileShaderAllowMovableDirectionalLightsRule::IsValid()
-	{
-		const UOculusXRRuleProcessorSubsystem* RuleProcessorSubsystem = GEngine->GetEngineSubsystem<UOculusXRRuleProcessorSubsystem>();
-		return !RuleProcessorSubsystem->DynamicLightsExistInProject();
 	}
 } // namespace OculusXRRenderingRules

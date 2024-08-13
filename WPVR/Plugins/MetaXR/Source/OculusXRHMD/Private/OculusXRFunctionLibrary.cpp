@@ -2,6 +2,8 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "OculusXRFunctionLibrary.h"
+#include "OculusXRFunctionLibraryOpenXR.h"
+#include "OculusXRFunctionLibraryOVR.h"
 #include "OculusXRHMDPrivate.h"
 #include "OculusXRHMD.h"
 #include "Logging/MessageLog.h"
@@ -11,6 +13,32 @@
 //-------------------------------------------------------------------------------------------------
 // UOculusXRFunctionLibrary
 //-------------------------------------------------------------------------------------------------
+
+TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> UOculusXRFunctionLibrary::FunctionLibraryImpl = nullptr;
+
+TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> UOculusXRFunctionLibrary::GetOculusXRFunctionImpl()
+{
+	if (FunctionLibraryImpl == nullptr)
+	{
+		const FName SystemName(TEXT("OpenXR"));
+		const bool IsOpenXR = GEngine->XRSystem.IsValid() && (GEngine->XRSystem->GetSystemName() == SystemName);
+
+		if (OculusXRHMD::FOculusXRHMD::GetOculusXRHMD() != nullptr)
+		{
+			FunctionLibraryImpl = MakeShared<OculusXRHMD::FOculusXRFunctionLibraryOVR>();
+		}
+		else if (IsOpenXR)
+		{
+			FunctionLibraryImpl = MakeShared<OculusXRHMD::FOculusXRFunctionLibraryOpenXR>();
+		}
+	}
+	return FunctionLibraryImpl;
+}
+
+void UOculusXRFunctionLibrary::ShutdownXRFunctionLibrary()
+{
+	FunctionLibraryImpl = nullptr;
+}
 
 UOculusXRFunctionLibrary::UOculusXRFunctionLibrary(const FObjectInitializer& ObjectInitializer)
 	: Super(ObjectInitializer)
@@ -25,121 +53,63 @@ OculusXRHMD::FOculusXRHMD* UOculusXRFunctionLibrary::GetOculusXRHMD()
 void UOculusXRFunctionLibrary::GetPose(FRotator& DeviceRotation, FVector& DevicePosition, FVector& NeckPosition, bool bUseOrienationForPlayerCamera, bool bUsePositionForPlayerCamera, const FVector PositionScale)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD && OculusXRHMD->IsHeadTrackingAllowed())
-	{
-		FQuat HeadOrientation = FQuat::Identity;
-		FVector HeadPosition = FVector::ZeroVector;
-
-		OculusXRHMD->GetCurrentPose(OculusXRHMD->HMDDeviceId, HeadOrientation, HeadPosition);
-
-		DeviceRotation = HeadOrientation.Rotator();
-		DevicePosition = HeadPosition;
-		NeckPosition = OculusXRHMD->GetNeckPosition(HeadOrientation, HeadPosition);
-	}
-	else
-#endif // #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	{
-		DeviceRotation = FRotator::ZeroRotator;
-		DevicePosition = FVector::ZeroVector;
-		NeckPosition = FVector::ZeroVector;
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->GetPose(DeviceRotation, DevicePosition, NeckPosition);
+#else
+	DeviceRotation = FRotator::ZeroRotator;
+	DevicePosition = FVector::ZeroVector;
+	NeckPosition = FVector::ZeroVector;
+#endif
 }
 
 void UOculusXRFunctionLibrary::SetBaseRotationAndBaseOffsetInMeters(FRotator Rotation, FVector BaseOffsetInMeters, EOrientPositionSelector::Type Options)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		if ((Options == EOrientPositionSelector::Orientation) || (Options == EOrientPositionSelector::OrientationAndPosition))
-		{
-			OculusXRHMD->SetBaseRotation(Rotation);
-		}
-		if ((Options == EOrientPositionSelector::Position) || (Options == EOrientPositionSelector::OrientationAndPosition))
-		{
-			OculusXRHMD->SetBaseOffsetInMeters(BaseOffsetInMeters);
-		}
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->SetBaseRotationAndBaseOffsetInMeters(Rotation, BaseOffsetInMeters, Options);
+#endif
 }
 
 void UOculusXRFunctionLibrary::GetBaseRotationAndBaseOffsetInMeters(FRotator& OutRotation, FVector& OutBaseOffsetInMeters)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		OutRotation = OculusXRHMD->GetBaseRotation();
-		OutBaseOffsetInMeters = OculusXRHMD->GetBaseOffsetInMeters();
-	}
-	else
-	{
-		OutRotation = FRotator::ZeroRotator;
-		OutBaseOffsetInMeters = FVector::ZeroVector;
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->GetBaseRotationAndBaseOffsetInMeters(OutRotation, OutBaseOffsetInMeters);
+#endif
 }
 
 void UOculusXRFunctionLibrary::GetRawSensorData(FVector& AngularAcceleration, FVector& LinearAcceleration, FVector& AngularVelocity, FVector& LinearVelocity, float& TimeInSeconds, EOculusXRTrackedDeviceType DeviceType)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr && OculusXRHMD->IsHMDActive())
-	{
-		ovrpPoseStatef state;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetNodePoseState3(ovrpStep_Render, OVRP_CURRENT_FRAMEINDEX, OculusXRHMD::ToOvrpNode(DeviceType), &state)))
-		{
-			AngularAcceleration = OculusXRHMD::ToFVector(state.AngularAcceleration);
-			LinearAcceleration = OculusXRHMD::ToFVector(state.Acceleration);
-			AngularVelocity = OculusXRHMD::ToFVector(state.AngularVelocity);
-			LinearVelocity = OculusXRHMD::ToFVector(state.Velocity);
-			TimeInSeconds = state.Time;
-		}
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->GetRawSensorData(AngularAcceleration, LinearAcceleration, AngularVelocity, LinearVelocity, TimeInSeconds, DeviceType);
+#endif
 }
 
 bool UOculusXRFunctionLibrary::IsDeviceTracked(EOculusXRTrackedDeviceType DeviceType)
 {
+	bool bIsDeviceTracked = false;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr && OculusXRHMD->IsHMDActive())
-	{
-		ovrpBool Present;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetNodePresent2(OculusXRHMD::ToOvrpNode(DeviceType), &Present)))
-		{
-			return Present != ovrpBool_False;
-		}
-		else
-		{
-			return false;
-		}
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
-	return false;
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	bIsDeviceTracked = Impl->IsDeviceTracked(DeviceType);
+#endif
+	return bIsDeviceTracked;
 }
 
 void UOculusXRFunctionLibrary::GetSuggestedCpuAndGpuPerformanceLevels(EOculusXRProcessorPerformanceLevel& CpuPerfLevel, EOculusXRProcessorPerformanceLevel& GpuPerfLevel)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr && OculusXRHMD->IsHMDActive())
-	{
-		OculusXRHMD->GetSuggestedCpuAndGpuPerformanceLevels(CpuPerfLevel, GpuPerfLevel);
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->GetSuggestedCpuAndGpuPerformanceLevels(CpuPerfLevel, GpuPerfLevel);
+#endif
 }
 
 void UOculusXRFunctionLibrary::SetSuggestedCpuAndGpuPerformanceLevels(EOculusXRProcessorPerformanceLevel CpuPerfLevel, EOculusXRProcessorPerformanceLevel GpuPerfLevel)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr && OculusXRHMD->IsHMDActive())
-	{
-		OculusXRHMD->SetSuggestedCpuAndGpuPerformanceLevels(CpuPerfLevel, GpuPerfLevel);
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->SetSuggestedCpuAndGpuPerformanceLevels(CpuPerfLevel, GpuPerfLevel);
+#endif
 }
 
 void UOculusXRFunctionLibrary::SetCPUAndGPULevels(int CPULevel, int GPULevel)
@@ -149,610 +119,290 @@ void UOculusXRFunctionLibrary::SetCPUAndGPULevels(int CPULevel, int GPULevel)
 
 bool UOculusXRFunctionLibrary::GetUserProfile(FOculusXRHmdUserProfile& Profile)
 {
+	bool bGetUserProfile = false;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		OculusXRHMD::FOculusXRHMD::UserProfile Data;
-		if (OculusXRHMD->GetUserProfile(Data))
-		{
-			Profile.Name = "";
-			Profile.Gender = "Unknown";
-			Profile.PlayerHeight = 0.0f;
-			Profile.EyeHeight = Data.EyeHeight;
-			Profile.IPD = Data.IPD;
-			Profile.NeckToEyeDistance = FVector2D(Data.EyeDepth, 0.0f);
-			return true;
-		}
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
-	return false;
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	bGetUserProfile = Impl->GetUserProfile(Profile);
+#endif
+	return bGetUserProfile;
 }
 
 void UOculusXRFunctionLibrary::SetBaseRotationAndPositionOffset(FRotator BaseRot, FVector PosOffset, EOrientPositionSelector::Type Options)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		if (Options == EOrientPositionSelector::Orientation || Options == EOrientPositionSelector::OrientationAndPosition)
-		{
-			OculusXRHMD->SetBaseRotation(BaseRot);
-		}
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->SetBaseRotationAndPositionOffset(BaseRot, PosOffset, Options);
+#endif
 }
 
 void UOculusXRFunctionLibrary::GetBaseRotationAndPositionOffset(FRotator& OutRot, FVector& OutPosOffset)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		OutRot = OculusXRHMD->GetBaseRotation();
-		OutPosOffset = FVector::ZeroVector;
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->GetBaseRotationAndPositionOffset(OutRot, OutPosOffset);
+#endif
 }
 
 void UOculusXRFunctionLibrary::AddLoadingSplashScreen(class UTexture2D* Texture, FVector TranslationInMeters, FRotator Rotation, FVector2D SizeInMeters, FRotator DeltaRotation, bool bClearBeforeAdd)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		OculusXRHMD::FSplash* Splash = OculusXRHMD->GetSplash();
-		if (Splash)
-		{
-			if (bClearBeforeAdd)
-			{
-				Splash->ClearSplashes();
-			}
-
-			FOculusXRSplashDesc Desc;
-			Desc.LoadingTexture = Texture;
-			Desc.QuadSizeInMeters = SizeInMeters;
-			Desc.TransformInMeters = FTransform(Rotation, TranslationInMeters);
-			Desc.DeltaRotation = FQuat(DeltaRotation);
-			Splash->AddSplash(Desc);
-		}
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->AddLoadingSplashScreen(Texture, TranslationInMeters, Rotation, SizeInMeters, DeltaRotation, bClearBeforeAdd);
+#endif
 }
 
 void UOculusXRFunctionLibrary::ClearLoadingSplashScreens()
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		OculusXRHMD::FSplash* Splash = OculusXRHMD->GetSplash();
-		if (Splash)
-		{
-			Splash->ClearSplashes();
-		}
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->ClearLoadingSplashScreens();
+#endif
 }
 
 bool UOculusXRFunctionLibrary::HasInputFocus()
 {
+	bool bHasInputFocus = false;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	const OculusXRHMD::FOculusXRHMD* const OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr && OculusXRHMD->IsHMDActive())
-	{
-		ovrpBool HasFocus;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetAppHasInputFocus(&HasFocus)))
-		{
-			return HasFocus != ovrpBool_False;
-		}
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
-	return false;
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	bHasInputFocus = Impl->HasInputFocus();
+#endif
+	return bHasInputFocus;
 }
 
 bool UOculusXRFunctionLibrary::HasSystemOverlayPresent()
 {
+	bool bHasSystemOverlayPresent = false;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	const OculusXRHMD::FOculusXRHMD* const OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr && OculusXRHMD->IsHMDActive())
-	{
-		ovrpBool HasFocus;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetAppHasInputFocus(&HasFocus)))
-		{
-			return HasFocus == ovrpBool_False;
-		}
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
-	return false;
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	bHasSystemOverlayPresent = Impl->HasSystemOverlayPresent();
+#endif
+	return bHasSystemOverlayPresent;
 }
 
 void UOculusXRFunctionLibrary::GetGPUUtilization(bool& IsGPUAvailable, float& GPUUtilization)
 {
 	GPUUtilization = 0.0f;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	const OculusXRHMD::FOculusXRHMD* const OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpBool bIsSupported = ovrpBool_False;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().IsPerfMetricsSupported(ovrpPerfMetrics_System_GpuUtilPercentage_Float, &bIsSupported)) && bIsSupported == ovrpBool_True)
-		{
-			if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetPerfMetricsFloat(ovrpPerfMetrics_System_GpuUtilPercentage_Float, &GPUUtilization)))
-			{
-				IsGPUAvailable = true;
-				GPUUtilization *= 100;
-			}
-		}
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->GetGPUUtilization(IsGPUAvailable, GPUUtilization);
+#endif
 }
 
 float UOculusXRFunctionLibrary::GetGPUFrameTime()
 {
 	float FrameTime = 0;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	const OculusXRHMD::FOculusXRHMD* const OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpBool bIsSupported = ovrpBool_False;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().IsPerfMetricsSupported(ovrpPerfMetrics_App_GpuTime_Float, &bIsSupported)) && bIsSupported == ovrpBool_True)
-		{
-			if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetPerfMetricsFloat(ovrpPerfMetrics_App_GpuTime_Float, &FrameTime)))
-			{
-				return FrameTime * 1000;
-			}
-		}
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
-	return 0.0f;
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	FrameTime = Impl->GetGPUFrameTime();
+#endif
+	return FrameTime;
 }
 
 void UOculusXRFunctionLibrary::GetPerformanceMetrics(FOculusXRPerformanceMetrics& PerformanceMetrics)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	const OculusXRHMD::FOculusXRHMD* const OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		PerformanceMetrics = OculusXRHMD->GetPerformanceMetrics();
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->GetPerformanceMetrics(PerformanceMetrics);
 #endif
 }
 
 
 EOculusXRFoveatedRenderingMethod UOculusXRFunctionLibrary::GetFoveatedRenderingMethod()
 {
+	EOculusXRFoveatedRenderingMethod FoveatedRenderingMethod = EOculusXRFoveatedRenderingMethod::FixedFoveatedRendering;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpBool enabled;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetFoveationEyeTracked(&enabled)))
-		{
-			return enabled == ovrpBool_True ? EOculusXRFoveatedRenderingMethod::EyeTrackedFoveatedRendering : EOculusXRFoveatedRenderingMethod::FixedFoveatedRendering;
-		}
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
-	return EOculusXRFoveatedRenderingMethod::FixedFoveatedRendering;
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	FoveatedRenderingMethod = Impl->GetFoveatedRenderingMethod();
+#endif
+	return FoveatedRenderingMethod;
 }
 
 void UOculusXRFunctionLibrary::SetFoveatedRenderingMethod(EOculusXRFoveatedRenderingMethod Method)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		OculusXRHMD->SetFoveatedRenderingMethod(Method);
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->SetFoveatedRenderingMethod(Method);
+#endif
 }
 
 void UOculusXRFunctionLibrary::SetFoveatedRenderingLevel(EOculusXRFoveatedRenderingLevel level, bool isDynamic)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		OculusXRHMD->SetFoveatedRenderingLevel(level, isDynamic);
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->SetFoveatedRenderingLevel(level, isDynamic);
+#endif
 }
 
 EOculusXRFoveatedRenderingLevel UOculusXRFunctionLibrary::GetFoveatedRenderingLevel()
 {
+	EOculusXRFoveatedRenderingLevel FoveatedRenderingLevel = EOculusXRFoveatedRenderingLevel::Off;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpTiledMultiResLevel Lvl;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetTiledMultiResLevel(&Lvl)))
-		{
-			return (EOculusXRFoveatedRenderingLevel)Lvl;
-		}
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
-	return EOculusXRFoveatedRenderingLevel::Off;
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	FoveatedRenderingLevel = Impl->GetFoveatedRenderingLevel();
+#endif
+	return FoveatedRenderingLevel;
 }
 
 bool UOculusXRFunctionLibrary::GetEyeTrackedFoveatedRenderingSupported()
 {
+	bool bEyeTrackedFoveatedRenderingSupported = false;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	// Always return false on other engine releases, since they don't have FDM offset support
-#ifdef WITH_OCULUS_BRANCH
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpBool Supported;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetFoveationEyeTrackedSupported(&Supported)))
-		{
-			return Supported == ovrpBool_True;
-		}
-	}
-#endif // WITH_OCULUS_BRANCH
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
-	return false;
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	bEyeTrackedFoveatedRenderingSupported = Impl->GetEyeTrackedFoveatedRenderingSupported();
+#endif
+	return bEyeTrackedFoveatedRenderingSupported;
 }
 
 FString UOculusXRFunctionLibrary::GetDeviceName()
 {
+	FString DeviceName;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		const char* NameString;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetSystemProductName2(&NameString)) && NameString)
-		{
-			return FString(NameString);
-		}
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	DeviceName = Impl->GetDeviceName();
 #endif
-	return FString();
+	return DeviceName;
 }
 
 EOculusXRDeviceType UOculusXRFunctionLibrary::GetDeviceType()
 {
+	EOculusXRDeviceType DeviceType = EOculusXRDeviceType::OculusUnknown;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		if (OculusXRHMD->GetSettings())
-		{
-			switch (OculusXRHMD->GetSettings()->SystemHeadset)
-			{
-				case ovrpSystemHeadset_Oculus_Quest:
-					return EOculusXRDeviceType::OculusQuest_Deprecated;
-				case ovrpSystemHeadset_Oculus_Quest_2:
-					return EOculusXRDeviceType::OculusQuest2;
-				case ovrpSystemHeadset_Meta_Quest_Pro:
-					return EOculusXRDeviceType::MetaQuestPro;
-				case ovrpSystemHeadset_Meta_Quest_3:
-					return EOculusXRDeviceType::MetaQuest3;
-				case ovrpSystemHeadset_Rift_CV1:
-					return EOculusXRDeviceType::Rift;
-				case ovrpSystemHeadset_Rift_S:
-					return EOculusXRDeviceType::Rift_S;
-				case ovrpSystemHeadset_Oculus_Link_Quest:
-					return EOculusXRDeviceType::Quest_Link_Deprecated;
-				case ovrpSystemHeadset_Oculus_Link_Quest_2:
-					return EOculusXRDeviceType::Quest2_Link;
-				case ovrpSystemHeadset_Meta_Link_Quest_Pro:
-					return EOculusXRDeviceType::MetaQuestProLink;
-				case ovrpSystemHeadset_Meta_Link_Quest_3:
-					return EOculusXRDeviceType::MetaQuest3Link;
-				default:
-					break;
-			}
-		}
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	DeviceType = Impl->GetDeviceType();
 #endif
-	return EOculusXRDeviceType::OculusUnknown;
+	return DeviceType;
 }
 
 EOculusXRControllerType UOculusXRFunctionLibrary::GetControllerType(EControllerHand deviceHand)
 {
+	EOculusXRControllerType ControllerType = EOculusXRControllerType::Unknown;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	auto getOVRPHand = [](EControllerHand hand) {
-		switch (hand)
-		{
-			case EControllerHand::Left:
-				return ovrpHand::ovrpHand_Left;
-			case EControllerHand::Right:
-				return ovrpHand::ovrpHand_Right;
-			default:
-				return ovrpHand::ovrpHand_None;
-		}
-		return ovrpHand::ovrpHand_None;
-	};
-
-	auto getEControllerType = [](ovrpInteractionProfile profile) {
-		switch (profile)
-		{
-			case ovrpInteractionProfile::ovrpInteractionProfile_Touch:
-				return EOculusXRControllerType::MetaQuestTouch;
-			case ovrpInteractionProfile::ovrpInteractionProfile_TouchPro:
-				return EOculusXRControllerType::MetaQuestTouchPro;
-			case ovrpInteractionProfile::ovrpInteractionProfile_TouchPlus:
-				return EOculusXRControllerType::MetaQuestTouchPlus;
-			default:
-				return EOculusXRControllerType::None;
-		}
-		return EOculusXRControllerType::None;
-	};
-
-	ovrpInteractionProfile interactionProfile = ovrpInteractionProfile::ovrpInteractionProfile_None;
-	ovrpHand hand = getOVRPHand(deviceHand);
-	if (hand == ovrpHand::ovrpHand_None)
-		return EOculusXRControllerType::Unknown;
-	if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetCurrentInteractionProfile(hand, &interactionProfile)))
-	{
-		return getEControllerType(interactionProfile);
-	}
-	return EOculusXRControllerType::Unknown;
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	ControllerType = Impl->GetControllerType(deviceHand);
 #endif
-	return EOculusXRControllerType::Unknown;
+	return ControllerType;
 }
 
 TArray<float> UOculusXRFunctionLibrary::GetAvailableDisplayFrequencies()
 {
+	TArray<float> FreqArray;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		int NumberOfFrequencies;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetSystemDisplayAvailableFrequencies(nullptr, &NumberOfFrequencies)))
-		{
-			TArray<float> freqArray;
-			freqArray.SetNum(NumberOfFrequencies);
-			FOculusXRHMDModule::GetPluginWrapper().GetSystemDisplayAvailableFrequencies(freqArray.GetData(), &NumberOfFrequencies);
-			return freqArray;
-		}
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	FreqArray = Impl->GetAvailableDisplayFrequencies();
 #endif
-	return TArray<float>();
+	return FreqArray;
 }
 
 float UOculusXRFunctionLibrary::GetCurrentDisplayFrequency()
 {
+	float Frequency = 0.0f;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		float Frequency;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetSystemDisplayFrequency2(&Frequency)))
-		{
-			return Frequency;
-		}
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Frequency = Impl->GetCurrentDisplayFrequency();
 #endif
-	return 0.0f;
+	return Frequency;
 }
 
 void UOculusXRFunctionLibrary::SetDisplayFrequency(float RequestedFrequency)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		FOculusXRHMDModule::GetPluginWrapper().SetSystemDisplayFrequency(RequestedFrequency);
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->SetDisplayFrequency(RequestedFrequency);
 #endif
 }
 
 void UOculusXRFunctionLibrary::EnablePositionTracking(bool bPositionTracking)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		FOculusXRHMDModule::GetPluginWrapper().SetTrackingPositionEnabled2(bPositionTracking);
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->EnablePositionTracking(bPositionTracking);
 #endif
 }
 
 void UOculusXRFunctionLibrary::EnableOrientationTracking(bool bOrientationTracking)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		FOculusXRHMDModule::GetPluginWrapper().SetTrackingOrientationEnabled2(bOrientationTracking);
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->EnableOrientationTracking(bOrientationTracking);
 #endif
 }
 
 void UOculusXRFunctionLibrary::SetColorScaleAndOffset(FLinearColor ColorScale, FLinearColor ColorOffset, bool bApplyToAllLayers)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		OculusXRHMD->SetColorScaleAndOffset(ColorScale, ColorOffset, bApplyToAllLayers);
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->SetColorScaleAndOffset(ColorScale, ColorOffset, bApplyToAllLayers);
 #endif
 }
 
 class IStereoLayers* UOculusXRFunctionLibrary::GetStereoLayers()
 {
+	IStereoLayers* Layers = nullptr;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		return OculusXRHMD;
-	}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
-	return nullptr;
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Layers = Impl->GetStereoLayers();
+#endif
+	return Layers;
 }
-
-/** Helper that converts EOculusXRBoundaryType to ovrpBoundaryType */
-#if OCULUS_HMD_SUPPORTED_PLATFORMS
-static ovrpBoundaryType ToOvrpBoundaryType(EOculusXRBoundaryType Source)
-{
-	switch (Source)
-	{
-		case EOculusXRBoundaryType::Boundary_PlayArea:
-			return ovrpBoundary_PlayArea;
-
-		case EOculusXRBoundaryType::Boundary_Outer:
-		default:
-			return ovrpBoundary_Outer;
-	}
-}
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
 
 bool UOculusXRFunctionLibrary::IsGuardianConfigured()
 {
+	bool bIsGuardianConfigured = false;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpBool boundaryConfigured;
-		return OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetBoundaryConfigured2(&boundaryConfigured)) && boundaryConfigured;
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	bIsGuardianConfigured = Impl->IsGuardianConfigured();
 #endif
-	return false;
+	return bIsGuardianConfigured;
 }
 
 bool UOculusXRFunctionLibrary::IsGuardianDisplayed()
 {
+	bool bIsGuardianDisplayed = false;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpBool boundaryVisible;
-		return OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetBoundaryVisible2(&boundaryVisible)) && boundaryVisible;
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	bIsGuardianDisplayed = Impl->IsGuardianDisplayed();
 #endif
-	return false;
+	return bIsGuardianDisplayed;
 }
 
 TArray<FVector> UOculusXRFunctionLibrary::GetGuardianPoints(EOculusXRBoundaryType BoundaryType, bool UsePawnSpace /* = false */)
 {
 	TArray<FVector> BoundaryPointList;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpBool bBoundaryConfigured = false;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetBoundaryConfigured2(&bBoundaryConfigured)) && bBoundaryConfigured)
-		{
-			ovrpBoundaryType obt = ToOvrpBoundaryType(BoundaryType);
-			int NumPoints = 0;
-
-			if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetBoundaryGeometry3(obt, nullptr, &NumPoints)))
-			{
-				//allocate points
-				const int BufferSize = NumPoints;
-				ovrpVector3f* BoundaryPoints = new ovrpVector3f[BufferSize];
-
-				if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetBoundaryGeometry3(obt, BoundaryPoints, &NumPoints)))
-				{
-					NumPoints = FMath::Min(BufferSize, NumPoints);
-					check(NumPoints <= BufferSize); // For static analyzer
-					BoundaryPointList.Reserve(NumPoints);
-
-					for (int i = 0; i < NumPoints; i++)
-					{
-						FVector point;
-						if (UsePawnSpace)
-						{
-							point = OculusXRHMD->ConvertVector_M2U(BoundaryPoints[i]);
-						}
-						else
-						{
-							point = OculusXRHMD->ScaleAndMovePointWithPlayer(BoundaryPoints[i]);
-						}
-						BoundaryPointList.Add(point);
-					}
-				}
-
-				delete[] BoundaryPoints;
-			}
-		}
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	BoundaryPointList = Impl->GetGuardianPoints(BoundaryType, UsePawnSpace);
 #endif
 	return BoundaryPointList;
 }
 
 FVector UOculusXRFunctionLibrary::GetGuardianDimensions(EOculusXRBoundaryType BoundaryType)
 {
+	FVector Dimensions = FVector::ZeroVector;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpBoundaryType obt = ToOvrpBoundaryType(BoundaryType);
-		ovrpVector3f Dimensions;
-
-		if (OVRP_FAILURE(FOculusXRHMDModule::GetPluginWrapper().GetBoundaryDimensions2(obt, &Dimensions)))
-			return FVector::ZeroVector;
-
-		Dimensions.z *= -1.0;
-		return OculusXRHMD->ConvertVector_M2U(Dimensions);
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Dimensions = Impl->GetGuardianDimensions(BoundaryType);
 #endif
-	return FVector::ZeroVector;
+	return Dimensions;
 }
 
 FTransform UOculusXRFunctionLibrary::GetPlayAreaTransform()
 {
+	FTransform Transform;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpBool bBoundaryConfigured = false;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetBoundaryConfigured2(&bBoundaryConfigured)) && bBoundaryConfigured)
-		{
-			int NumPoints = 4;
-			ovrpVector3f BoundaryPoints[4];
-
-			if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetBoundaryGeometry3(ovrpBoundary_PlayArea, BoundaryPoints, &NumPoints)))
-			{
-				FVector ConvertedPoints[4];
-
-				for (int i = 0; i < NumPoints; i++)
-				{
-					ConvertedPoints[i] = OculusXRHMD->ScaleAndMovePointWithPlayer(BoundaryPoints[i]);
-				}
-
-				float metersScale = OculusXRHMD->GetWorldToMetersScale();
-
-				FVector Edge = ConvertedPoints[1] - ConvertedPoints[0];
-				float Angle = FMath::Acos((Edge).GetSafeNormal() | FVector::RightVector);
-				FQuat Rotation(FVector::UpVector, Edge.X < 0 ? Angle : -Angle);
-
-				FVector Position = (ConvertedPoints[0] + ConvertedPoints[1] + ConvertedPoints[2] + ConvertedPoints[3]) / 4;
-				FVector Scale(FVector::Distance(ConvertedPoints[3], ConvertedPoints[0]) / metersScale, FVector::Distance(ConvertedPoints[1], ConvertedPoints[0]) / metersScale, 1.0);
-
-				return FTransform(Rotation, Position, Scale);
-			}
-		}
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Transform = Impl->GetPlayAreaTransform();
 #endif
-	return FTransform();
+	return Transform;
 }
 
 FOculusXRGuardianTestResult UOculusXRFunctionLibrary::GetPointGuardianIntersection(const FVector Point, EOculusXRBoundaryType BoundaryType)
 {
 	FOculusXRGuardianTestResult InteractionInfo;
 	memset(&InteractionInfo, 0, sizeof(FOculusXRGuardianTestResult));
-
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpVector3f OvrpPoint = OculusXRHMD->WorldLocationToOculusPoint(Point);
-		ovrpBoundaryType OvrpBoundaryType = ToOvrpBoundaryType(BoundaryType);
-		ovrpBoundaryTestResult InteractionResult;
-
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().TestBoundaryPoint2(OvrpPoint, OvrpBoundaryType, &InteractionResult)))
-		{
-			InteractionInfo.IsTriggering = (InteractionResult.IsTriggering != 0);
-			InteractionInfo.ClosestDistance = OculusXRHMD->ConvertFloat_M2U(InteractionResult.ClosestDistance);
-			InteractionInfo.ClosestPoint = OculusXRHMD->ScaleAndMovePointWithPlayer(InteractionResult.ClosestPoint);
-			InteractionInfo.ClosestPointNormal = OculusXRHMD->ConvertVector_M2U(InteractionResult.ClosestPointNormal);
-			InteractionInfo.DeviceType = EOculusXRTrackedDeviceType::None;
-		}
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	InteractionInfo = Impl->GetPointGuardianIntersection(Point, BoundaryType);
 #endif
-
 	return InteractionInfo;
 }
 
@@ -760,238 +410,134 @@ FOculusXRGuardianTestResult UOculusXRFunctionLibrary::GetNodeGuardianIntersectio
 {
 	FOculusXRGuardianTestResult InteractionInfo;
 	memset(&InteractionInfo, 0, sizeof(FOculusXRGuardianTestResult));
-
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpNode OvrpNode = OculusXRHMD::ToOvrpNode(DeviceType);
-		ovrpBoundaryType OvrpBoundaryType = ToOvrpBoundaryType(BoundaryType);
-		ovrpBoundaryTestResult TestResult;
-
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().TestBoundaryNode2(OvrpNode, ovrpBoundary_PlayArea, &TestResult)) && TestResult.IsTriggering)
-		{
-			InteractionInfo.IsTriggering = true;
-			InteractionInfo.DeviceType = OculusXRHMD::ToEOculusXRTrackedDeviceType(OvrpNode);
-			InteractionInfo.ClosestDistance = OculusXRHMD->ConvertFloat_M2U(TestResult.ClosestDistance);
-			InteractionInfo.ClosestPoint = OculusXRHMD->ScaleAndMovePointWithPlayer(TestResult.ClosestPoint);
-			InteractionInfo.ClosestPointNormal = OculusXRHMD->ConvertVector_M2U(TestResult.ClosestPointNormal);
-		}
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	InteractionInfo = Impl->GetNodeGuardianIntersection(DeviceType, BoundaryType);
 #endif
-
 	return InteractionInfo;
 }
 
 void UOculusXRFunctionLibrary::SetGuardianVisibility(bool GuardianVisible)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		FOculusXRHMDModule::GetPluginWrapper().SetBoundaryVisible2(GuardianVisible);
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->SetGuardianVisibility(GuardianVisible);
 #endif
 }
 
 bool UOculusXRFunctionLibrary::GetSystemHmd3DofModeEnabled()
 {
+	bool bGetSystemHmd3DofModeEnabled = false;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpBool enabled;
-		return OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetSystemHmd3DofModeEnabled(&enabled)) && enabled;
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	bGetSystemHmd3DofModeEnabled = Impl->GetSystemHmd3DofModeEnabled();
 #endif
-	return false;
+	return bGetSystemHmd3DofModeEnabled;
 }
 
 EOculusXRColorSpace UOculusXRFunctionLibrary::GetHmdColorDesc()
 {
+	EOculusXRColorSpace HmdColorSpace = EOculusXRColorSpace::Unknown;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpColorSpace HmdColorSpace;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetHmdColorDesc(&HmdColorSpace)))
-		{
-			return (EOculusXRColorSpace)HmdColorSpace;
-		}
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	HmdColorSpace = Impl->GetHmdColorDesc();
 #endif
-	return EOculusXRColorSpace::Unknown;
+	return HmdColorSpace;
 }
 
 void UOculusXRFunctionLibrary::SetClientColorDesc(EOculusXRColorSpace ColorSpace)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpColorSpace ClientColorSpace = (ovrpColorSpace)ColorSpace;
-#if PLATFORM_ANDROID
-		if (ClientColorSpace == ovrpColorSpace_Unknown)
-		{
-			ClientColorSpace = ovrpColorSpace_Quest;
-		}
-#endif
-		FOculusXRHMDModule::GetPluginWrapper().SetClientColorDesc(ClientColorSpace);
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->SetClientColorDesc(ColorSpace);
 #endif
 }
 
 void UOculusXRFunctionLibrary::SetLocalDimmingOn(bool LocalDimmingOn)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		UE_LOG(LogHMD, Log, TEXT("SetLocalDimmingOn %d"), LocalDimmingOn);
-		FOculusXRHMDModule::GetPluginWrapper().SetLocalDimming(LocalDimmingOn);
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->SetLocalDimmingOn(LocalDimmingOn);
 #endif
 }
 
 bool UOculusXRFunctionLibrary::IsPassthroughSupported()
 {
+	bool bIsPassthroughSupported = false;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpInsightPassthroughCapabilityFlags capabilities;
-
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetPassthroughCapabilityFlags(&capabilities)))
-		{
-			return (capabilities & ovrpInsightPassthroughCapabilityFlags::ovrpInsightPassthroughCapabilityFlags_Passthrough)
-				== ovrpInsightPassthroughCapabilityFlags::ovrpInsightPassthroughCapabilityFlags_Passthrough;
-		}
-
-		return false;
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	bIsPassthroughSupported = Impl->IsPassthroughSupported();
 #endif
-	return false;
+	return bIsPassthroughSupported;
 }
 
 bool UOculusXRFunctionLibrary::IsColorPassthroughSupported()
 {
+	bool bIsColorPassthroughSupported = false;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		ovrpInsightPassthroughCapabilityFlags capabilities;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetPassthroughCapabilityFlags(&capabilities)))
-		{
-			return (capabilities & ovrpInsightPassthroughCapabilityFlags::ovrpInsightPassthroughCapabilityFlags_Color)
-				== ovrpInsightPassthroughCapabilityFlags::ovrpInsightPassthroughCapabilityFlags_Color;
-		}
-		return false;
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	bIsColorPassthroughSupported = Impl->IsColorPassthroughSupported();
 #endif
-	return false;
+	return bIsColorPassthroughSupported;
 }
 
 void UOculusXRFunctionLibrary::StartEnvironmentDepth()
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		int CreateFlags = 0;
-		OculusXRHMD->StartEnvironmentDepth(CreateFlags);
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->StartEnvironmentDepth();
 #endif
 }
 
 void UOculusXRFunctionLibrary::StopEnvironmentDepth()
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		OculusXRHMD->StopEnvironmentDepth();
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->StopEnvironmentDepth();
 #endif
 }
 
 bool UOculusXRFunctionLibrary::IsEnvironmentDepthStarted()
 {
+	bool bIsEnvironmentDepthStarted = false;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		return OculusXRHMD->IsEnvironmentDepthStarted();
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	bIsEnvironmentDepthStarted = Impl->IsEnvironmentDepthStarted();
 #endif
-	return false;
+	return bIsEnvironmentDepthStarted;
 }
 
 void UOculusXRFunctionLibrary::SetEnvironmentDepthHandRemoval(bool RemoveHands)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		OculusXRHMD->SetEnvironmentDepthHandRemoval(RemoveHands);
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->SetEnvironmentDepthHandRemoval(RemoveHands);
 #endif
 }
 
 void UOculusXRFunctionLibrary::SetXROcclusionsMode(UObject* WorldContextObject, EOculusXROcclusionsMode Mode)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		OculusXRHMD->EnableHardOcclusions(Mode == EOculusXROcclusionsMode::HardOcclusions);
-	}
-#if defined(WITH_OCULUS_BRANCH)
-	WorldContextObject->GetWorld()->Scene->SetEnableXRPassthroughSoftOcclusions(Mode == EOculusXROcclusionsMode::SoftOcclusions);
-#else
-	ensureMsgf(Mode != EOculusXROcclusionsMode::SoftOcclusions, TEXT("Soft occlusions are only supported with the Oculus branch of the Unreal Engine"));
-#endif // defined(WITH_OCULUS_BRANCH)
-#endif // OCULUS_HMD_SUPPORTED_PLATFORMS
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->SetXROcclusionsMode(WorldContextObject, Mode);
+#endif
 }
 
 void UOculusXRFunctionLibrary::SetEyeBufferSharpenType(EOculusXREyeBufferSharpenType EyeBufferSharpenType)
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	OculusXRHMD::FOculusXRHMD* OculusXRHMD = GetOculusXRHMD();
-	if (OculusXRHMD != nullptr)
-	{
-		switch (EyeBufferSharpenType)
-		{
-			case EOculusXREyeBufferSharpenType::SLST_Normal:
-				FOculusXRHMDModule::GetPluginWrapper().SetEyeBufferSharpenType(ovrpLayerSubmitFlag_EfficientSharpen);
-				break;
-			case EOculusXREyeBufferSharpenType::SLST_Quality:
-				FOculusXRHMDModule::GetPluginWrapper().SetEyeBufferSharpenType(ovrpLayerSubmitFlag_QualitySharpen);
-				break;
-			case EOculusXREyeBufferSharpenType::SLST_Auto:
-				FOculusXRHMDModule::GetPluginWrapper().SetEyeBufferSharpenType(ovrpLayerSubmitFlag_AutoLayerFilter);
-				break;
-			default:
-				FOculusXRHMDModule::GetPluginWrapper().SetEyeBufferSharpenType(ovrpLayerSubmitFlags(0));
-				break;
-		}
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	Impl->SetEyeBufferSharpenType(EyeBufferSharpenType);
 #endif
 }
 
 bool UOculusXRFunctionLibrary::IsPassthroughRecommended()
 {
+	bool bIsPassthroughRecommended = false;
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
-	const OculusXRHMD::FOculusXRHMD* OculusHMD = GetOculusXRHMD();
-	if (OculusHMD != nullptr)
-	{
-		ovrpPassthroughPreferences Preferences;
-		if (OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetPassthroughPreferences(&Preferences)))
-		{
-			return (Preferences.Flags & ovrpPassthroughPreferenceFlags::ovrpPassthroughPreferenceFlags_DefaultToActive)
-				== ovrpPassthroughPreferenceFlags::ovrpPassthroughPreferenceFlags_DefaultToActive;
-		};
-	}
+	TSharedPtr<OculusXRHMD::IOculusXRFunctionLibrary> Impl = GetOculusXRFunctionImpl();
+	bIsPassthroughRecommended = Impl->IsPassthroughRecommended();
 #endif
-	return false;
+	return bIsPassthroughRecommended;
 }
 #undef LOCTEXT_NAMESPACE

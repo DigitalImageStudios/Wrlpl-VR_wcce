@@ -22,7 +22,7 @@ namespace OculusXRHMD
 		check(Settings.IsValid());
 	}
 
-	void FDynamicResolutionState::ResetHistory(){
+	void FDynamicResolutionState::ResetHistory() {
 		// Empty - Oculus drives resolution fraction externally
 	};
 
@@ -52,6 +52,13 @@ namespace OculusXRHMD
 			ViewFamily.SetScreenPercentageInterface(new FLegacyScreenPercentageDriver(ViewFamily, ResolutionFraction, ResolutionFractionUpperBound));
 		}
 	}
+#if !UE_VERSION_OLDER_THAN(5, 4, 0)
+	void FDynamicResolutionState::SetTemporalUpscaler(const UE::Renderer::Private::ITemporalUpscaler* InTemporalUpscaler)
+	{
+		// Not supported
+		return;
+	}
+#endif // !UE_VERSION_OLDER_THAN(5, 4, 0)
 
 	DynamicRenderScaling::TMap<float> FDynamicResolutionState::GetResolutionFractionsApproximation() const
 	{
@@ -81,10 +88,10 @@ namespace OculusXRHMD
 		return Settings->Flags.bPixelDensityAdaptive;
 	}
 
-	void FDynamicResolutionState::ProcessEvent(EDynamicResolutionStateEvent Event){
+	void FDynamicResolutionState::ProcessEvent(EDynamicResolutionStateEvent Event) {
 		// Empty - Oculus drives resolution fraction externally
 	};
 
 } // namespace OculusXRHMD
 
-#endif //OCULUS_HMD_SUPPORTED_PLATFORMS
+#endif // OCULUS_HMD_SUPPORTED_PLATFORMS

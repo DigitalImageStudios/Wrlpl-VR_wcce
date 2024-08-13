@@ -7,7 +7,7 @@
 #define OCULUS_SCENE_SUPPORTED_PLATFORMS (PLATFORM_WINDOWS && WINVER > 0x0502) || (PLATFORM_ANDROID_ARM || PLATFORM_ANDROID_ARM64)
 
 /**
- * The public interface to this module.  In most cases, this interface is only public to sibling modules 
+ * The public interface to this module.  In most cases, this interface is only public to sibling modules
  * within this plugin.
  */
 class IOculusXRSceneModule : public IModuleInterface

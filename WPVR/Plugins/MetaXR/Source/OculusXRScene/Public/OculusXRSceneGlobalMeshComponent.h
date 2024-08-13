@@ -11,9 +11,9 @@
 class UMaterialInterface;
 
 /**
-* DEPRECATED: AOculusXRSceneActor and associated classes are deprecated (v65), please use MR Utility Kit instead
-* (https://developer.oculus.com/documentation/unreal/unreal-mr-utility-kit-overview)
-*/
+ * DEPRECATED: AOculusXRSceneActor and associated classes are deprecated (v65), please use MR Utility Kit instead
+ * (https://developer.oculus.com/documentation/unreal/unreal-mr-utility-kit-overview)
+ */
 UCLASS(meta = (DisplayName = "OculusXR Scene Global Mesh Component", BlueprintSpawnableComponent))
 class OCULUSXRSCENE_API UOculusXRSceneGlobalMeshComponent : public UActorComponent
 {

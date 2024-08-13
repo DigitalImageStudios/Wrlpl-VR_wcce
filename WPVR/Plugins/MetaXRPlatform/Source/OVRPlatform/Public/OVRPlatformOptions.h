@@ -32,9 +32,11 @@ struct OVRPLATFORM_API FOvrAbuseReportOptions
 {
     GENERATED_USTRUCT_BODY()
 
+    /** Set whether or not to show the user selection step in the report dialog. */
     UPROPERTY(BlueprintReadWrite, Category = "OvrPlatform|Options|AbuseReport|Option")
     bool PreventPeopleChooser;
 
+    /** The intended entity being reported, whether user or object/content. */
     UPROPERTY(BlueprintReadWrite, Category = "OvrPlatform|Options|AbuseReport|Option")
     EOvrAbuseReportType ReportType;
 
@@ -50,16 +52,25 @@ struct OVRPLATFORM_API FOvrAdvancedAbuseReportOptions
 {
     GENERATED_USTRUCT_BODY()
 
+    /**
+     * This field is intended to allow developers to pass custom metadata through the report flow. The metadata passed through is included with the report
+     * received by the developer.
+     */
     UPROPERTY(BlueprintReadWrite, Category = "OvrPlatform|Options|AdvancedAbuseReport|Option")
     TMap<FString, FString> DeveloperDefinedContext;
 
-    /** If report_type is content, a string representing the type of content being reported. This should correspond to the object_type string used in the UI */
+    /** If report_type is object/content, a string representing the type of content being reported. This should correspond to the object_type string used in the UI */
     UPROPERTY(BlueprintReadWrite, Category = "OvrPlatform|Options|AdvancedAbuseReport|Option")
     FString ObjectType;
 
+    /** The intended entity being reported, whether user or object/content. */
     UPROPERTY(BlueprintReadWrite, Category = "OvrPlatform|Options|AdvancedAbuseReport|Option")
     EOvrAbuseReportType ReportType;
 
+    /**
+     * Provide a list of users to suggest for reporting. This list should include users that the reporter has recently interacted with
+     * to aid them in selecting the right user to report.
+     */
     UPROPERTY(BlueprintReadWrite, Category = "OvrPlatform|Options|AdvancedAbuseReport|Option")
     TArray<FOvrId> SuggestedUsers;
 

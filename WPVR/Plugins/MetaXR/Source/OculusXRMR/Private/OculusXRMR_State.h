@@ -14,8 +14,8 @@ struct FOculusXRTrackedCamera
 	GENERATED_USTRUCT_BODY()
 
 	/** >=0: the index of the external camera
-		* -1: not bind to any external camera (and would be setup to match the manual CastingCameraActor placement)
-		*/
+	 * -1: not bind to any external camera (and would be setup to match the manual CastingCameraActor placement)
+	 */
 	UPROPERTY()
 	int32 Index;
 
@@ -86,8 +86,8 @@ struct FOculusXRTrackedCamera
 };
 
 /**
-* Object to hold the state of MR capture and capturing camera
-*/
+ * Object to hold the state of MR capture and capturing camera
+ */
 UCLASS(ClassGroup = OculusXRMR, NotPlaceable, NotBlueprintable)
 class UOculusXRMR_State : public UObject
 {

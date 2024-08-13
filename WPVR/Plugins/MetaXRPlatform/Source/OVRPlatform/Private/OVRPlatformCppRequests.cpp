@@ -25,6 +25,7 @@
 #include "OVRPlatformOptionsConverters.h"
 
 #include "OVRPlatformSubsystem.h"
+#include "Engine/GameInstance.h"
 
 // ----------------------------------------------------------------------
 // AbuseReport

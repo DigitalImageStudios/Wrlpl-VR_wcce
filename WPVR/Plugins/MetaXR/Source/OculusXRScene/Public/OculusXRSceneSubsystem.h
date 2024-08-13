@@ -26,6 +26,20 @@ public:
 	virtual TStatId GetStatId() const override { RETURN_QUICK_DECLARE_CYCLE_STAT(UOculusXRSceneSubsystem, STATGROUP_Tickables); }
 	// FTickableGameObject implementation End
 
+	UFUNCTION(BlueprintCallable, Category = "OculusXR|Scene")
+	EOculusXRBoundaryVisibility GetBoundaryVisibility();
+
+	UFUNCTION(BlueprintCallable, Category = "OculusXR|Scene")
+	EOculusXRBoundaryVisibility GetRequestedBoundaryVisibility();
+
+	UFUNCTION(BlueprintCallable, Category = "OculusXR|Scene")
+	void SetRequestedBoundaryVisibility(EOculusXRBoundaryVisibility Visibility);
 
 private:
+	void OnBoundaryVisibilityChanged(EOculusXRBoundaryVisibility visibility);
+	void UpdateBoundary();
+
+	EOculusXRBoundaryVisibility requestedVisibilityState_;
+	FDelegateHandle visChangedEventHandle_;
+	bool bInitialized;
 };

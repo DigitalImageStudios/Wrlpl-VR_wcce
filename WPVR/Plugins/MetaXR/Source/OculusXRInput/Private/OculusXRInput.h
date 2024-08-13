@@ -142,4 +142,4 @@ namespace OculusXRInput
 
 } // namespace OculusXRInput
 
-#endif //OCULUS_INPUT_SUPPORTED_PLATFORMS
+#endif // OCULUS_INPUT_SUPPORTED_PLATFORMS

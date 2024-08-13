@@ -13,11 +13,11 @@ namespace OculusXRMovementRules
 	public:
 		FEnableBodyTrackingRule()
 			: ISetupRule(
-				"Feature_EnableBodyTracking",
-				NSLOCTEXT("OculusXRMovementRules", "EnableBodyTracking_DisplayName", "Enable Body Tracking"),
-				NSLOCTEXT("OculusXRMovementRules", "EnableBodyTracking_Description", "Body tracking must be enabled when using body tracking features"),
-				ESetupRuleCategory::Features,
-				ESetupRuleSeverity::Critical) {}
+				  "Feature_EnableBodyTracking",
+				  NSLOCTEXT("OculusXRMovementRules", "EnableBodyTracking_DisplayName", "Enable Body Tracking"),
+				  NSLOCTEXT("OculusXRMovementRules", "EnableBodyTracking_Description", "Body tracking must be enabled when using body tracking features"),
+				  ESetupRuleCategory::Features,
+				  ESetupRuleSeverity::Critical) {}
 		virtual bool IsApplied() const override;
 		virtual bool IsValid() override;
 
@@ -30,11 +30,11 @@ namespace OculusXRMovementRules
 	public:
 		FEnableFaceTrackingRule()
 			: ISetupRule(
-				"Feature_EnableFaceTracking",
-				NSLOCTEXT("OculusXRMovementRules", "EnableFaceTracking_DisplayName", "Enable Face Tracking"),
-				NSLOCTEXT("OculusXRMovementRules", "EnableFaceTracking_Description", "Face tracking must be enabled when using face tracking features"),
-				ESetupRuleCategory::Features,
-				ESetupRuleSeverity::Critical) {}
+				  "Feature_EnableFaceTracking",
+				  NSLOCTEXT("OculusXRMovementRules", "EnableFaceTracking_DisplayName", "Enable Face Tracking"),
+				  NSLOCTEXT("OculusXRMovementRules", "EnableFaceTracking_Description", "Face tracking must be enabled when using face tracking features"),
+				  ESetupRuleCategory::Features,
+				  ESetupRuleSeverity::Critical) {}
 		virtual bool IsApplied() const override;
 		virtual bool IsValid() override;
 
@@ -47,11 +47,11 @@ namespace OculusXRMovementRules
 	public:
 		FEnableEyeTrackingRule()
 			: ISetupRule(
-				"Feature_EnableEyeTracking",
-				NSLOCTEXT("OculusXRMovementRules", "EnableEyeTracking_DisplayName", "Enable Eye Tracking"),
-				NSLOCTEXT("OculusXRMovementRules", "EnableEyeTracking_Description", "Eye tracking must be enabled when using eye tracking features"),
-				ESetupRuleCategory::Features,
-				ESetupRuleSeverity::Critical) {}
+				  "Feature_EnableEyeTracking",
+				  NSLOCTEXT("OculusXRMovementRules", "EnableEyeTracking_DisplayName", "Enable Eye Tracking"),
+				  NSLOCTEXT("OculusXRMovementRules", "EnableEyeTracking_Description", "Eye tracking must be enabled when using eye tracking features"),
+				  ESetupRuleCategory::Features,
+				  ESetupRuleSeverity::Critical) {}
 		virtual bool IsApplied() const override;
 		virtual bool IsValid() override;
 

@@ -53,7 +53,10 @@ bool OculusPluginWrapper::InitializeOculusPluginWrapper(OculusPluginWrapper* wra
 		void** EntryPointPtr;
 	};
 
-#define OCULUS_BIND_ENTRY_POINT(Func) { "ovrp_" #Func, (void**)&wrapper->Func }
+#define OCULUS_BIND_ENTRY_POINT(Func)         \
+	{                                         \
+		"ovrp_" #Func, (void**)&wrapper->Func \
+	}
 
 	OculusEntryPoint entryPointArray[] = {
 		// OVR_Plugin.h
@@ -110,6 +113,8 @@ bool OculusPluginWrapper::InitializeOculusPluginWrapper(OculusPluginWrapper* wra
 		OCULUS_BIND_ENTRY_POINT(GetTrackingPositionSupported2),
 		OCULUS_BIND_ENTRY_POINT(GetTrackingPositionEnabled2),
 		OCULUS_BIND_ENTRY_POINT(SetTrackingPositionEnabled2),
+		OCULUS_BIND_ENTRY_POINT(GetTrackingPoseEnabledForInvisibleSession),
+		OCULUS_BIND_ENTRY_POINT(SetTrackingPoseEnabledForInvisibleSession),
 		OCULUS_BIND_ENTRY_POINT(GetTrackingIPDEnabled2),
 		OCULUS_BIND_ENTRY_POINT(SetTrackingIPDEnabled2),
 		OCULUS_BIND_ENTRY_POINT(GetTrackingCalibratedOrigin2),
@@ -217,7 +222,7 @@ bool OculusPluginWrapper::InitializeOculusPluginWrapper(OculusPluginWrapper* wra
 		OCULUS_BIND_ENTRY_POINT(GetTrackingTransformRawPose),
 		OCULUS_BIND_ENTRY_POINT(GetTrackingTransformRelativePose),
 		OCULUS_BIND_ENTRY_POINT(GetTimeInSeconds),
-		//OCULUS_BIND_ENTRY_POINT(GetPTWNear),
+		// OCULUS_BIND_ENTRY_POINT(GetPTWNear),
 		OCULUS_BIND_ENTRY_POINT(GetASWVelocityScale),
 		OCULUS_BIND_ENTRY_POINT(GetASWDepthScale),
 		OCULUS_BIND_ENTRY_POINT(GetASWAdaptiveMode),
@@ -228,6 +233,7 @@ bool OculusPluginWrapper::InitializeOculusPluginWrapper(OculusPluginWrapper* wra
 		OCULUS_BIND_ENTRY_POINT(GetHandState),
 		OCULUS_BIND_ENTRY_POINT(GetHandState2),
 		OCULUS_BIND_ENTRY_POINT(GetSkeleton2),
+		OCULUS_BIND_ENTRY_POINT(GetSkeleton3),
 		OCULUS_BIND_ENTRY_POINT(GetMesh),
 		OCULUS_BIND_ENTRY_POINT(GetLocalTrackingSpaceRecenterCount),
 		OCULUS_BIND_ENTRY_POINT(GetSystemHmd3DofModeEnabled),
@@ -293,6 +299,9 @@ bool OculusPluginWrapper::InitializeOculusPluginWrapper(OculusPluginWrapper* wra
 
 
 
+		// Boundary Visibility
+		OCULUS_BIND_ENTRY_POINT(RequestBoundaryVisibility),
+		OCULUS_BIND_ENTRY_POINT(GetBoundaryVisibility),
 
 
 		// MovementSDK

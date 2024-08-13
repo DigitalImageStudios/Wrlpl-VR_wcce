@@ -17,8 +17,8 @@ namespace OculusXRHMD
 
 	FConsoleCommands::FConsoleCommands(class FOculusXRHMD* InHMDPtr)
 		: UpdateOnRenderThreadCommand(TEXT("vr.oculus.bUpdateOnRenderThread"),
-			*NSLOCTEXT("OculusRift", "CCommandText_UpdateRT", "Oculus Rift specific extension.\nEnables or disables updating on the render thread.").ToString(),
-			FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateRaw(InHMDPtr, &FOculusXRHMD::UpdateOnRenderThreadCommandHandler))
+			  *NSLOCTEXT("OculusRift", "CCommandText_UpdateRT", "Oculus Rift specific extension.\nEnables or disables updating on the render thread.").ToString(),
+			  FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateRaw(InHMDPtr, &FOculusXRHMD::UpdateOnRenderThreadCommandHandler))
 		, PixelDensityMinCommand(TEXT("vr.oculus.PixelDensity.min"),
 			  *NSLOCTEXT("OculusRift", "CCommandText_PixelDensityMin", "Oculus Rift specific extension.\nMinimum pixel density when adaptive pixel density is enabled").ToString(),
 			  FConsoleCommandWithWorldArgsAndOutputDeviceDelegate::CreateRaw(InHMDPtr, &FOculusXRHMD::PixelDensityMinCommandHandler))

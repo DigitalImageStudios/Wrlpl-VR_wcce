@@ -2,6 +2,7 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "OculusXRHMDModule.h"
+#include "OculusXRFunctionLibrary.h"
 #include "OculusXRHMD.h"
 #include "OculusXRHMDPrivateRHI.h"
 #include "OculusXRHMDRuntimeSettings.h"
@@ -81,6 +82,8 @@ void FOculusXRHMDModule::StartupModule()
 void FOculusXRHMDModule::ShutdownModule()
 {
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
+	UOculusXRFunctionLibrary::ShutdownXRFunctionLibrary();
+
 	if (PluginWrapper.IsInitialized())
 	{
 		OculusXRTelemetry::FTelemetryBackend::OnEditorShutdown();
@@ -160,7 +163,12 @@ bool FOculusXRHMDModule::PreInit()
 #endif // !UE_BUILD_SHIPPING
 #endif // !PLATFORM_ANDROID
 
-			if (OVRP_FAILURE(PluginWrapper.PreInitialize5(Activity, PreinitApiType, ovrpPreinitializeFlags::ovrpPreinitializeFlag_None)))
+			// Determine Preinit flag based on platform
+			ovrpPreinitializeFlags PreinitFlag = ovrpPreinitializeFlags::ovrpPreinitializeFlag_None;
+#if WITH_EDITOR && PLATFORM_WINDOWS
+			PreinitFlag = ovrpPreinitializeFlags::ovrpPreinitializeFlag_DisableLogSystemError;
+#endif
+			if (OVRP_FAILURE(PluginWrapper.PreInitialize5(Activity, PreinitApiType, PreinitFlag)))
 			{
 				UE_LOG(LogHMD, Log, TEXT("Failed initializing OVRPlugin %s"), TEXT(OVRP_VERSION_STR));
 #if WITH_EDITOR && PLATFORM_WINDOWS
@@ -302,7 +310,7 @@ TSharedPtr<class IXRTrackingSystem, ESPMode::ThreadSafe> FOculusXRHMDModule::Cre
 #if OCULUS_HMD_SUPPORTED_PLATFORMS
 	if (bPreInit || (GIsEditor && PLATFORM_WINDOWS))
 	{
-		//If -HMDSimulator is used as the command option to launch UE, use simulator runtime instead of the physical HMD runtime (like PC-Link).
+		// If -HMDSimulator is used as the command option to launch UE, use simulator runtime instead of the physical HMD runtime (like PC-Link).
 		if (FParse::Param(FCommandLine::Get(), TEXT("HMDSimulator")) && GetMutableDefault<UOculusXRHMDRuntimeSettings>()->MetaXRJsonPath.FilePath.Len())
 		{
 			if (!IsSimulatorActivated())
@@ -420,6 +428,13 @@ void FOculusXRHMDModule::LaunchEnvironment(FString EnvironmentName)
 {
 #if PLATFORM_WINDOWS
 	FMetaXRSES::LaunchEnvironment(EnvironmentName);
+#endif
+}
+
+void FOculusXRHMDModule::LaunchMoreRoomsEnvironment(FString EnvironmentName)
+{
+#if PLATFORM_WINDOWS
+	FMetaXRSES::LaunchMoreRoomsEnvironment(EnvironmentName);
 #endif
 }
 

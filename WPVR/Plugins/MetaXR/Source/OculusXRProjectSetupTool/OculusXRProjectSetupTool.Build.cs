@@ -4,48 +4,48 @@ using UnrealBuildTool;
 
 public class OculusXRProjectSetupTool : ModuleRules
 {
-	public OculusXRProjectSetupTool(ReadOnlyTargetRules Target) : base(Target)
-	{
+    public OculusXRProjectSetupTool(ReadOnlyTargetRules Target) : base(Target)
+    {
 
-		bUseUnity = true;
+        bUseUnity = true;
 
-		PrivateIncludePaths.AddRange(
-			new string[] {
-				"OculusXRHMD/Private",
-			});
+        PrivateIncludePaths.AddRange(
+            new string[] {
+                "OculusXRHMD/Private",
+            });
 
-		PublicDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Core",
-				"CoreUObject",
-				"Engine"
-			}
-		);
+        PublicDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "Core",
+                "CoreUObject",
+                "Engine"
+            }
+        );
 
-		PrivateDependencyModuleNames.AddRange(
-			new string[]
-			{
-				"Projects",
-				"UnrealEd",
-				"LevelEditor",
-				"Slate",
-				"SlateCore",
-				"EditorStyle",
-				"EngineSettings",
-				"OculusXRHMD",
-				"OculusXRMovement",
-				"OculusXRPassthrough",
-				"OculusXRAnchors",
-				"OculusXRScene",
-				"AndroidRuntimeSettings",
-				"LauncherServices",
-				"ToolWidgets",
-				"WorkspaceMenuStructure",
-				"PluginBrowser",
-				"ToolMenus",
-				"RHI",
-			}
-		);
-	}
+        PrivateDependencyModuleNames.AddRange(
+            new string[]
+            {
+                "Projects",
+                "UnrealEd",
+                "LevelEditor",
+                "Slate",
+                "SlateCore",
+                "EditorStyle",
+                "EngineSettings",
+                "OculusXRHMD",
+                "OculusXRMovement",
+                "OculusXRPassthrough",
+                "OculusXRAnchors",
+                "OculusXRScene",
+                "AndroidRuntimeSettings",
+                "LauncherServices",
+                "ToolWidgets",
+                "WorkspaceMenuStructure",
+                "PluginBrowser",
+                "ToolMenus",
+                "RHI",
+            }
+        );
+    }
 }

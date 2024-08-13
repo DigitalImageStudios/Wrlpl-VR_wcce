@@ -50,7 +50,7 @@ namespace OculusXRHMD
 		Flags.bCompositeDepth = true;
 #if PLATFORM_ANDROID
 		Flags.bsRGBEyeBuffer = true;
-		//oculus mobile is always-on stereo, no need for enableStereo codepaths
+		// oculus mobile is always-on stereo, no need for enableStereo codepaths
 		Flags.bStereoEnabled = true;
 #else
 		Flags.bsRGBEyeBuffer = false;
@@ -66,6 +66,8 @@ namespace OculusXRHMD
 		Flags.bAnchorSupportEnabled = false;
 		Flags.bAnchorSharingEnabled = false;
 		Flags.bSceneSupportEnabled = false;
+		Flags.bBoundaryVisibilitySupportEnabled = false;
+		Flags.bDefaultBoundaryVisibilitySuppressed = false;
 		Flags.bBodyTrackingEnabled = false;
 		Flags.bEyeTrackingEnabled = false;
 		Flags.bFaceTrackingEnabled = false;
@@ -134,4 +136,4 @@ namespace OculusXRHMD
 
 } // namespace OculusXRHMD
 
-#endif //OCULUS_HMD_SUPPORTED_PLATFORMS
+#endif // OCULUS_HMD_SUPPORTED_PLATFORMS

@@ -8,7 +8,7 @@
 #define OCULUS_MR_SUPPORTED_PLATFORMS ((PLATFORM_WINDOWS && WINVER > 0x0502) || PLATFORM_ANDROID)
 
 /**
- * The public interface to this module.  In most cases, this interface is only public to sibling modules 
+ * The public interface to this module.  In most cases, this interface is only public to sibling modules
  * within this plugin.
  */
 class IOculusXRMRModule : public IModuleInterface

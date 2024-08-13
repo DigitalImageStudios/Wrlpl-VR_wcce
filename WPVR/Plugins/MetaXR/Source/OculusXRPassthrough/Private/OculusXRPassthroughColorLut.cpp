@@ -3,6 +3,7 @@
 #include "OculusXRPassthroughColorLut.h"
 #include "OculusXRPassthroughLayerComponent.h"
 #include "OculusXRHMDPrivate.h"
+#include "OculusXRHMDModule.h"
 #include "Math/UnrealMathUtility.h"
 #include "GenericPlatform/GenericPlatformMath.h"
 #include "UObject/ObjectSaveContext.h"

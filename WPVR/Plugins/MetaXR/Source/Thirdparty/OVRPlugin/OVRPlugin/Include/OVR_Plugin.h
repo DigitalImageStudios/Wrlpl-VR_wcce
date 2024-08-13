@@ -198,6 +198,30 @@ OVRP_EXPORT ovrpResult ovrp_GetLayerTextureSpaceWarp(
     ovrpTextureHandle* depthTextureHandle,
     ovrpSizei* depthResultSize);
 
+/// Gets the space warp texture handles for a specific layer stage and eye.
+OVRP_EXPORT ovrpResult ovrp_GetLayerTextureSpaceWarp2(
+    int layerId,
+    int stage,
+    ovrpEye eyeId,
+    ovrpTextureHandle* motionVectorTextureHandle,
+    ovrpSizei* motionVectorResultSize,
+    ovrpTextureHandle* depthTextureHandle,
+    ovrpSizei* depthResultSize,
+    ovrpTextureHandle* foveationTextureHandle,
+    ovrpSizei* foveationResultSize);
+
+/// Gets the motion vector texture handles for a specific layer stage and eye.
+OVRP_EXPORT ovrpResult ovrp_GetLayerMotionVectorTextures(
+    int layerId,
+    int stage,
+    ovrpEye eyeId,
+    ovrpTextureHandle* motionVectorTextureHandle,
+    ovrpSizei* motionVectorResultSize,
+    ovrpTextureHandle* depthTextureHandle,
+    ovrpSizei* depthResultSize,
+    ovrpTextureHandle* foveationTextureHandle,
+    ovrpSizei* foveationResultSize);
+
 /// Gets the texture handle for a specific layer stage and eye.
 OVRP_EXPORT ovrpResult ovrp_GetLayerAndroidSurfaceObject(int layerId, void** surfaceObject);
 
@@ -331,6 +355,13 @@ OVRP_EXPORT ovrpResult ovrp_GetTrackingPositionEnabled2(ovrpBool* trackingPositi
 
 /// If true, head tracking affects the position reported by ovrp_GetEyePose.
 OVRP_EXPORT ovrpResult ovrp_SetTrackingPositionEnabled2(ovrpBool trackingPositionEnabled);
+
+/// If true, head tracking affects the pose reported by ovrp_GetEyePose even for invisible sessions.
+OVRP_EXPORT ovrpResult ovrp_GetTrackingPoseEnabledForInvisibleSession(ovrpBool* trackingPoseEnabled);
+
+/// If true, head tracking affects the pose reported by ovrp_GetEyePose even for invisible sessions.
+/// If false, last visible frame's head pose is used.
+OVRP_EXPORT ovrpResult ovrp_SetTrackingPoseEnabledForInvisibleSession(ovrpBool trackingPoseEnabled);
 
 /// If true, the inter-pupillary distance affects the position reported by ovrp_GetEyePose.
 OVRP_EXPORT ovrpResult ovrp_GetTrackingIPDEnabled2(ovrpBool* trackingIPDEnabled);
@@ -679,6 +710,12 @@ OVRP_EXPORT ovrpResult ovrp_GetTiledMultiResDynamic(ovrpBool* isDynamic);
 /// Sets if MultiRes is dynamic or not
 OVRP_EXPORT ovrpResult ovrp_SetTiledMultiResDynamic(ovrpBool isDynamic);
 
+/// Returns the current motion vector multires level on the device
+OVRP_EXPORT ovrpResult ovrp_GetMotionVectorTiledMultiResLevel(ovrpTiledMultiResLevel* level);
+
+/// Sets MultiRes motion vector levels
+OVRP_EXPORT ovrpResult ovrp_SetMotionVectorTiledMultiResLevel(ovrpTiledMultiResLevel level);
+
 /// Return true if the device supports eye tracked foveation
 OVRP_EXPORT ovrpResult ovrp_GetFoveationEyeTrackedSupported(ovrpBool* foveationSupported);
 
@@ -690,6 +727,26 @@ OVRP_EXPORT ovrpResult ovrp_SetFoveationEyeTracked(ovrpBool isEyeTracked);
 
 /// Gets the eye tracked foveation center (used for tile offset)
 OVRP_EXPORT ovrpResult ovrp_GetFoveationEyeTrackedCenter(ovrpVector2f fovCenter[2]);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1172,9 +1229,8 @@ OVRP_EXPORT ovrpResult ovrp_EraseSpaces(
 
 
 
-
-
-
+OVRP_EXPORT ovrpResult ovrp_RequestBoundaryVisibility(ovrpBoundaryVisibility boundaryVisibility);
+OVRP_EXPORT ovrpResult ovrp_GetBoundaryVisibility(ovrpBoundaryVisibility* boundaryVisibility);
 
 OVRP_EXPORT ovrpResult ovrp_IsLayerShapeSupported(ovrpShape shape, ovrpBool* isLayerShapeSupported);
 
@@ -1213,6 +1269,10 @@ OVRP_EXPORT ovrpResult ovrp_GetEnvironmentDepthFrameDesc(ovrpEye eyeId, ovrpEnvi
 
 
 
+
+OVRP_EXPORT ovrpResult ovrp_SetDualCoreBoostEnabled(ovrpBool enabled);
+OVRP_EXPORT ovrpResult ovrp_SetProcessorFavor(int favorEnum);
+OVRP_EXPORT ovrpResult ovrp_GetLowPowerModeEnabled(ovrpBool* enabled);
 
 #ifdef __cplusplus
 }

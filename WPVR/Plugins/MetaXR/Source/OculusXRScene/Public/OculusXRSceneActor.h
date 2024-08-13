@@ -11,14 +11,14 @@
 #include "OculusXRSceneActor.generated.h"
 
 /** EOculusXRLaunchCaptureFlowWhenMissingScene
-* Used to dictate whether the actor should launch the Capture Flow application when a scene is not detected on the device.
-* The Actor will check if a scene capture is either non-existent or invalid (ie. missing walls/ceiling/floor) before checking if Capture Flow
-* should be launched.
-*
-* NEVER:	will never launch Flow Capture.
-* ONCE:		will only launch it once.  If the actor still doesn't detect that a scene was captured, it will not launch Capture Flow again.
-* ALWAYS:	will always re-launch Flow Capture if a scene was not detected on the device.
-*/
+ * Used to dictate whether the actor should launch the Capture Flow application when a scene is not detected on the device.
+ * The Actor will check if a scene capture is either non-existent or invalid (ie. missing walls/ceiling/floor) before checking if Capture Flow
+ * should be launched.
+ *
+ * NEVER:	will never launch Flow Capture.
+ * ONCE:		will only launch it once.  If the actor still doesn't detect that a scene was captured, it will not launch Capture Flow again.
+ * ALWAYS:	will always re-launch Flow Capture if a scene was not detected on the device.
+ */
 UENUM(BlueprintType)
 enum EOculusXRLaunchCaptureFlowWhenMissingScene
 {
@@ -28,8 +28,8 @@ enum EOculusXRLaunchCaptureFlowWhenMissingScene
 };
 
 /** FOculusXRSpawnedSceneAnchorProperties
-* Properties/Components that a spawned scene anchor will use.
-*/
+ * Properties/Components that a spawned scene anchor will use.
+ */
 USTRUCT(BlueprintType)
 struct OCULUSXRSCENE_API FOculusXRSpawnedSceneAnchorProperties
 {
@@ -49,24 +49,24 @@ struct OCULUSXRSCENE_API FOculusXRSpawnedSceneAnchorProperties
 };
 
 /**
-* AOculusXRSceneActor
-*
-* DEPRECATED: AOculusXRSceneActor and associated classes are deprecated (v65), please use MR Utility Kit instead
-* (https://developer.oculus.com/documentation/unreal/unreal-mr-utility-kit-overview)
-*
-* The purpose of this actor is to be able to spawn "scene anchor" actors.
-*
-* Each actor type (based on their semantic label) can be configured to be spawned with a specific mesh and actor component.
-*
-* Overall, it provides a simple interface to be able to quickly get a captured scene from Capture Flow populated at runtime.
-* It also provides a basic and flexible template to making use of the OculusAnchorSDK and UOculusXRRoomLayoutManagerComponent
-* to drive the actor's logic.  This removes the need for the developer to implement a system from scratch that makes use of
-* the native methods and components.
-*
-* TLDR:
-* - This actor populates a captured scene (created in Capture Flow) by spawning child actors with predefined actor and mesh components.
-* - Can be used as is, or can be derived or modified as needed depending on the application's needs.
-*/
+ * AOculusXRSceneActor
+ *
+ * DEPRECATED: AOculusXRSceneActor and associated classes are deprecated (v65), please use MR Utility Kit instead
+ * (https://developer.oculus.com/documentation/unreal/unreal-mr-utility-kit-overview)
+ *
+ * The purpose of this actor is to be able to spawn "scene anchor" actors.
+ *
+ * Each actor type (based on their semantic label) can be configured to be spawned with a specific mesh and actor component.
+ *
+ * Overall, it provides a simple interface to be able to quickly get a captured scene from Capture Flow populated at runtime.
+ * It also provides a basic and flexible template to making use of the OculusAnchorSDK and UOculusXRRoomLayoutManagerComponent
+ * to drive the actor's logic.  This removes the need for the developer to implement a system from scratch that makes use of
+ * the native methods and components.
+ *
+ * TLDR:
+ * - This actor populates a captured scene (created in Capture Flow) by spawning child actors with predefined actor and mesh components.
+ * - Can be used as is, or can be derived or modified as needed depending on the application's needs.
+ */
 UCLASS(ClassGroup = OculusXRScene)
 class OCULUSXRSCENE_API AOculusXRSceneActor : public AActor
 {

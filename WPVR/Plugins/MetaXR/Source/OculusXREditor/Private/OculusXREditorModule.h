@@ -39,9 +39,18 @@ public:
 	void ToggleOpenXRRuntime();
 
 	void CreateSESSubMenus(FMenuBuilder& MenuBuilder);
+	void CreateSESMoreRoomsSubMenus(FMenuBuilder& MenuBuilder);
 	void LaunchSESGameRoom();
 	void LaunchSESLivingRoom();
 	void LaunchSESBedroom();
+	void LaunchSESMoreRoomsCorridor();
+	void LaunchSESMoreRoomsFurnitureFilledRoom();
+	void LaunchSESMoreRoomsHighCeilingRoom();
+	void LaunchSESMoreRoomsLivingRoomWithMultipleSpaces();
+	void LaunchSESMoreRoomsLShapeRoom();
+	void LaunchSESMoreRoomsOffice();
+	void LaunchSESMoreRoomsRoomWithStaircase();
+	void LaunchSESMoreRoomsTrapezoidalRoom();
 	void StopSESServer();
 
 public:
@@ -91,6 +100,7 @@ public:
 	bool OnLaunchImageChanged(const FString& InChosenImage);
 
 	EVisibility GetSystemSplashImageWarningVisibility() const;
+	EVisibility GetSystemSplashBackgroundDeprecationMessageVisibility() const;
 
 	FReply PluginClickPerfFn(bool text);
 	FReply PluginClickPlatFn(bool text);

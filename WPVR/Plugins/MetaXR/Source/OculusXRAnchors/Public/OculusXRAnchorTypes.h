@@ -48,6 +48,8 @@ namespace EOculusXRAnchorResult
 		Failure_SpaceTooDark = -9005,
 		Failure_SpaceTooBright = -9006,
 
+		// Boundary visibility
+		Warning_BoundaryVisibilitySuppressionNotAllowed = 9030,
 	};
 } // namespace EOculusXRAnchorResult
 

@@ -173,3 +173,8 @@ void UOculusXRInputFunctionLibrary::SetControllerDrivenHandPoses(EOculusXRContro
 {
 	return OculusXRInput::FOculusHandTracking::SetControllerDrivenHandPoses(Type);
 }
+
+EOculusXRControllerDrivenHandPoseTypes UOculusXRInputFunctionLibrary::GetControllerDrivenHandPoses()
+{
+	return OculusXRInput::FOculusHandTracking::ControllerDrivenHandType;
+}

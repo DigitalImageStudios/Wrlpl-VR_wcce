@@ -94,7 +94,7 @@ namespace OculusXRAnchors
 	void GetEventData(ovrpEventDataBuffer& Buffer, T& OutEventData)
 	{
 		unsigned char* BufData = Buffer.EventData;
-		BufData -= sizeof(uint64); //correct offset
+		BufData -= sizeof(uint64); // correct offset
 
 		memcpy(&OutEventData, BufData, sizeof(T));
 	}
@@ -130,7 +130,7 @@ namespace OculusXRAnchors
 				ovrpEventDataSpaceSetStatusComplete SetStatusEvent;
 				GetEventData(buf, SetStatusEvent);
 
-				//translate to BP types
+				// translate to BP types
 				const FOculusXRUInt64 RequestId(SetStatusEvent.requestId);
 				const FOculusXRUInt64 Space(SetStatusEvent.space);
 				EOculusXRSpaceComponentType BPSpaceComponentType = ConvertToUEComponentType(SetStatusEvent.componentType);
@@ -179,7 +179,7 @@ namespace OculusXRAnchors
 				{
 					UE_LOG(LogOculusXRAnchors, Verbose, TEXT("ovrpEventType_SpaceQueryResult Space: %llu  --  Result: %d"), queryResultElement.space, bGetQueryDataResult);
 
-					//translate types
+					// translate types
 					FOculusXRUInt64 Space(queryResultElement.space);
 					FOculusXRUUID BPUUID(queryResultElement.uuid.data);
 					FOculusXRAnchorEventDelegates::OculusSpaceQueryResult.Broadcast(RequestId, Space, BPUUID);
@@ -192,7 +192,7 @@ namespace OculusXRAnchors
 				ovrpEventSpaceQueryComplete QueryCompleteEvent;
 				GetEventData(buf, QueryCompleteEvent);
 
-				//translate to BP types
+				// translate to BP types
 				const FOculusXRUInt64 RequestId(QueryCompleteEvent.requestId);
 				const bool bSucceeded = QueryCompleteEvent.result >= 0;
 
@@ -207,7 +207,7 @@ namespace OculusXRAnchors
 				ovrpEventSpaceStorageSaveResult StorageResult;
 				GetEventData(buf, StorageResult);
 
-				//translate to BP types
+				// translate to BP types
 				const FOculusXRUUID uuid(StorageResult.uuid.data);
 				const FOculusXRUInt64 FSpace(StorageResult.space);
 				const FOculusXRUInt64 FRequest(StorageResult.requestId);
@@ -236,7 +236,7 @@ namespace OculusXRAnchors
 				ovrpEventSpaceStorageEraseResult SpaceEraseEvent;
 				GetEventData(buf, SpaceEraseEvent);
 
-				//translate to BP types
+				// translate to BP types
 				const FOculusXRUUID uuid(SpaceEraseEvent.uuid.data);
 				const FOculusXRUInt64 FRequestId(SpaceEraseEvent.requestId);
 				const FOculusXRUInt64 FResult(SpaceEraseEvent.result);
@@ -274,7 +274,7 @@ namespace OculusXRAnchors
 				FOculusXRUInt64 RequestId(SpaceDiscoveryCompleteEvent.requestId);
 				FOculusXRUInt64 Result(SpaceDiscoveryCompleteEvent.result);
 
-				UE_LOG(LogOculusXRAnchors, Verbose, TEXT("ovrpEventType_SpaceDiscoveryComplete  Request ID: %llu  --  Result: %d"), RequestId, Result);
+				UE_LOG(LogOculusXRAnchors, Verbose, TEXT("ovrpEventType_SpaceDiscoveryComplete  Request ID: %llu  --  Result: %llu"), RequestId.GetValue(), Result.GetValue());
 				FOculusXRAnchorEventDelegates::OculusAnchorsDiscoverComplete.Broadcast(RequestId, Result);
 
 				break;
@@ -292,7 +292,7 @@ namespace OculusXRAnchors
 				bool GetCapacityResult = FOculusXRHMDModule::GetPluginWrapper().GetInitialized() && OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().RetrieveSpaceDiscoveryResults(RequestId, &OVRPResults));
 
 				UE_LOG(LogOculusXRAnchors, Log, TEXT("ovrpEventType_SpaceDiscoveryResultsAvailable Request ID: %llu  --  Capacity: %d  --  Result: %d"),
-					RequestId, OVRPResults.ResultCountOutput, GetCapacityResult);
+					uint64(RequestId), OVRPResults.ResultCountOutput, GetCapacityResult);
 
 				// get data
 				OVRPResults.ResultCapacityInput = OVRPResults.ResultCountOutput;
@@ -321,7 +321,7 @@ namespace OculusXRAnchors
 				FOculusXRUInt64 RequestId(SpacesSaveEvent.requestId);
 				FOculusXRUInt64 Result(SpacesSaveEvent.result);
 
-				UE_LOG(LogOculusXRAnchors, Verbose, TEXT("ovrpEventType_SpacesSaveResult  Request ID: %llu  --  Result: %d"), RequestId, Result);
+				UE_LOG(LogOculusXRAnchors, Verbose, TEXT("ovrpEventType_SpacesSaveResult  Request ID: %llu  --  Result: %llu"), RequestId.GetValue(), Result.GetValue());
 				FOculusXRAnchorEventDelegates::OculusAnchorsSaveComplete.Broadcast(RequestId, Result);
 
 				break;
@@ -334,7 +334,7 @@ namespace OculusXRAnchors
 				FOculusXRUInt64 RequestId(SpacesEraseEvent.requestId);
 				FOculusXRUInt64 Result(SpacesEraseEvent.result);
 
-				UE_LOG(LogOculusXRAnchors, Verbose, TEXT("ovrpEventType_SpacesEraseResult  Request ID: %llu  --  Result: %d"), RequestId, Result);
+				UE_LOG(LogOculusXRAnchors, Verbose, TEXT("ovrpEventType_SpacesEraseResult  Request ID: %llu  --  Result: %llu"), RequestId.GetValue(), Result.GetValue());
 				FOculusXRAnchorEventDelegates::OculusAnchorsEraseComplete.Broadcast(RequestId, Result);
 
 				break;
@@ -773,7 +773,7 @@ namespace OculusXRAnchors
 			//    OpenXR             Unreal
 			//       | y            | z
 			//       |              |
-			//z <----+              +----> x
+			// z <----+              +----> x
 			//      /              /
 			//    x/             y/
 			//

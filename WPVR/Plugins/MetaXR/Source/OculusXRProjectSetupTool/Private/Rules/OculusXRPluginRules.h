@@ -11,10 +11,10 @@ namespace OculusXRPluginRules
 	public:
 		FUseRecommendedXRAPIRule()
 			: ISetupRule("Plugin_UseRecommendedXRAPI",
-				NSLOCTEXT("OculusXRPluginRules", "UseRecommendedXRAPI_DisplayName", "Use Recommended XR API"),
-				NSLOCTEXT("OculusXRPluginRules", "UseRecommendedXRAPI_Description", "It is currently recommended to use OVRPlugin + OpenXR for the XR API"),
-				ESetupRuleCategory::Plugins,
-				ESetupRuleSeverity::Warning) {}
+				  NSLOCTEXT("OculusXRPluginRules", "UseRecommendedXRAPI_DisplayName", "Use Recommended XR API"),
+				  NSLOCTEXT("OculusXRPluginRules", "UseRecommendedXRAPI_Description", "It is currently recommended to use OVRPlugin + OpenXR for the XR API"),
+				  ESetupRuleCategory::Plugins,
+				  ESetupRuleSeverity::Warning) {}
 
 		virtual bool IsApplied() const override;
 
@@ -27,10 +27,10 @@ namespace OculusXRPluginRules
 	public:
 		FDisableOculusVRRule()
 			: ISetupRule("Plugin_DisableOculusVR",
-				NSLOCTEXT("OculusXRPluginRules", "DisableOculusVR_DisplayName", "Disable OculusVR Plugin"),
-				NSLOCTEXT("OculusXRPluginRules", "DisableOculusVR_Description", "The OculusVR plugin is deprecated and should be disabled"),
-				ESetupRuleCategory::Plugins,
-				ESetupRuleSeverity::Warning) {}
+				  NSLOCTEXT("OculusXRPluginRules", "DisableOculusVR_DisplayName", "Disable OculusVR Plugin"),
+				  NSLOCTEXT("OculusXRPluginRules", "DisableOculusVR_Description", "The OculusVR plugin is deprecated and should be disabled"),
+				  ESetupRuleCategory::Plugins,
+				  ESetupRuleSeverity::Warning) {}
 
 		virtual bool IsApplied() const override;
 
@@ -47,10 +47,10 @@ namespace OculusXRPluginRules
 	public:
 		FDisableSteamVRRule()
 			: ISetupRule("Plugin_DisableSteamVR",
-				NSLOCTEXT("OculusXRPluginRules", "DisableSteamVR_DisplayName", "Disable SteamVR Plugin"),
-				NSLOCTEXT("OculusXRPluginRules", "DisableSteamVR_Description", "The SteamVR plugin is deprecated and should be disabled"),
-				ESetupRuleCategory::Plugins,
-				ESetupRuleSeverity::Warning) {}
+				  NSLOCTEXT("OculusXRPluginRules", "DisableSteamVR_DisplayName", "Disable SteamVR Plugin"),
+				  NSLOCTEXT("OculusXRPluginRules", "DisableSteamVR_Description", "The SteamVR plugin is deprecated and should be disabled"),
+				  ESetupRuleCategory::Plugins,
+				  ESetupRuleSeverity::Warning) {}
 
 		virtual bool IsApplied() const override;
 

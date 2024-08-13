@@ -95,12 +95,36 @@ namespace OculusXRTelemetry
 		}
 
 	} // namespace QPL
-	bool FQPLBackend::MarkerStart(const int MarkerId, const FTelemetryInstanceKey InstanceKey, const FTelemetryTimestamp Timestamp) { return QPL::MarkerStart(MarkerId, InstanceKey, Timestamp); }
-	bool FQPLBackend::MarkerEnd(const int MarkerId, const EAction Action, const FTelemetryInstanceKey InstanceKey, const FTelemetryTimestamp Timestamp) { return QPL::MarkerEnd(MarkerId, Action, InstanceKey, Timestamp); };
-	bool FQPLBackend::MarkerPoint(const int MarkerId, const char* Name, const FTelemetryInstanceKey InstanceKey, const FTelemetryTimestamp Timestamp) { return QPL::MarkerPoint(MarkerId, Name, InstanceKey, Timestamp); };
-	bool FQPLBackend::MarkerPointCached(const int MarkerId, const int NameHandle, const FTelemetryInstanceKey InstanceKey, const FTelemetryTimestamp Timestamp) { return QPL::MarkerPointCached(MarkerId, NameHandle, InstanceKey, Timestamp); };
-	bool FQPLBackend::MarkerAnnotation(const int MarkerId, const char* AnnotationKey, const char* AnnotationValue, const FTelemetryInstanceKey InstanceKey) { return QPL::MarkerAnnotation(MarkerId, AnnotationKey, AnnotationValue, InstanceKey); };
-	bool FQPLBackend::CreateMarkerHandle(const char* Name, int* NameHandle) { return QPL::CreateMarkerHandle(Name, NameHandle); };
-	bool FQPLBackend::DestroyMarkerHandle(const int NameHandle) { return QPL::DestroyMarkerHandle(NameHandle); };
-	bool FQPLBackend::OnEditorShutdown() { return QPL::OnEditorShutdown(); };
+	bool FQPLBackend::MarkerStart(const int MarkerId, const FTelemetryInstanceKey InstanceKey, const FTelemetryTimestamp Timestamp)
+	{
+		return QPL::MarkerStart(MarkerId, InstanceKey, Timestamp);
+	}
+	bool FQPLBackend::MarkerEnd(const int MarkerId, const EAction Action, const FTelemetryInstanceKey InstanceKey, const FTelemetryTimestamp Timestamp)
+	{
+		return QPL::MarkerEnd(MarkerId, Action, InstanceKey, Timestamp);
+	};
+	bool FQPLBackend::MarkerPoint(const int MarkerId, const char* Name, const FTelemetryInstanceKey InstanceKey, const FTelemetryTimestamp Timestamp)
+	{
+		return QPL::MarkerPoint(MarkerId, Name, InstanceKey, Timestamp);
+	};
+	bool FQPLBackend::MarkerPointCached(const int MarkerId, const int NameHandle, const FTelemetryInstanceKey InstanceKey, const FTelemetryTimestamp Timestamp)
+	{
+		return QPL::MarkerPointCached(MarkerId, NameHandle, InstanceKey, Timestamp);
+	};
+	bool FQPLBackend::MarkerAnnotation(const int MarkerId, const char* AnnotationKey, const char* AnnotationValue, const FTelemetryInstanceKey InstanceKey)
+	{
+		return QPL::MarkerAnnotation(MarkerId, AnnotationKey, AnnotationValue, InstanceKey);
+	};
+	bool FQPLBackend::CreateMarkerHandle(const char* Name, int* NameHandle)
+	{
+		return QPL::CreateMarkerHandle(Name, NameHandle);
+	};
+	bool FQPLBackend::DestroyMarkerHandle(const int NameHandle)
+	{
+		return QPL::DestroyMarkerHandle(NameHandle);
+	};
+	bool FQPLBackend::OnEditorShutdown()
+	{
+		return QPL::OnEditorShutdown();
+	};
 } // namespace OculusXRTelemetry

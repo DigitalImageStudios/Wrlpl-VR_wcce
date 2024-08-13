@@ -1285,7 +1285,7 @@ FReply SOculusPlatformToolWidget::OnSelectExpansionFilesPath()
 				if (!path.IsEmpty() && FPaths::DirectoryExists(path))
 				{
 					TArray<FString> Files;
-					//FFileManagerGeneric::Get().FindFilesRecursive(Files, *path, TEXT("*.*"), true, false, false);
+					// FFileManagerGeneric::Get().FindFilesRecursive(Files, *path, TEXT("*.*"), true, false, false);
 					IFileManager::Get().FindFiles(Files, *path);
 
 					TArray<FOculusXRAssetConfig>* AssetConfigs = PlatformSettings->GetAssetConfigs();
@@ -1422,7 +1422,7 @@ void SOculusPlatformToolWidget::SetPlatformProcess(FProcHandle proc)
 }
 
 //=======================================================================================
-//FPlatformDownloadTask
+// FPlatformDownloadTask
 
 FPlatformDownloadTask::FPlatformDownloadTask(FUpdateLogTextDel textDel, FEvent* saveEvent)
 {
@@ -1496,7 +1496,7 @@ void FPlatformDownloadTask::OnDownloadRequestComplete(FHttpRequestPtr HttpReques
 }
 
 //=======================================================================================
-//FPlatformUploadTask
+// FPlatformUploadTask
 
 FPlatformUploadTask::FPlatformUploadTask(FString args, FEnableUploadButtonDel del, FUpdateLogTextDel textDel, FSetProcessDel procDel)
 {
@@ -1565,7 +1565,7 @@ void FPlatformUploadTask::DoWork()
 }
 
 //=======================================================================================
-//FPlatformLoadRedistPackagesTask
+// FPlatformLoadRedistPackagesTask
 
 FPlatformLoadRedistPackagesTask::FPlatformLoadRedistPackagesTask(FUpdateLogTextDel textDel)
 {

@@ -5,14 +5,14 @@
 #include "Components/SkinnedMeshComponent.h"
 
 /*
-* Struct that allows applying morph targets data to an arbitrary skinned mesh component
-* instead of relying on the skeletal mesh component.
-* 
-* Usage - In a tick method of your choosing:
-* 1) ResetMorphTargetCurves(Component) at the start of the update.
-* 2) SetMorphTarget(...) as many times as needed based on your data set.
-* 3) ApplyMorphTargets(Component) at the end of the update to apply the morph targets to the anim runtime.
-*/
+ * Struct that allows applying morph targets data to an arbitrary skinned mesh component
+ * instead of relying on the skeletal mesh component.
+ *
+ * Usage - In a tick method of your choosing:
+ * 1) ResetMorphTargetCurves(Component) at the start of the update.
+ * 2) SetMorphTarget(...) as many times as needed based on your data set.
+ * 3) ApplyMorphTargets(Component) at the end of the update to apply the morph targets to the anim runtime.
+ */
 struct OCULUSXRMOVEMENT_API FOculusXRMorphTargetsController
 {
 public:

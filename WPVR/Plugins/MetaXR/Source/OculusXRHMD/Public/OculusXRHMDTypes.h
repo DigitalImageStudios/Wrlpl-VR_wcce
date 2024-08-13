@@ -126,9 +126,9 @@ enum class EOculusXRColorSpace : uint8
 };
 
 /*
-* Hand tracking settings. Please check https://developer.oculus.com/documentation/unreal/unreal-hand-tracking/
-* for detailed information.
-*/
+ * Hand tracking settings. Please check https://developer.oculus.com/documentation/unreal/unreal-hand-tracking/
+ * for detailed information.
+ */
 UENUM(BlueprintType)
 enum class EOculusXRHandTrackingSupport : uint8
 {
@@ -165,14 +165,14 @@ enum class EOculusXRProcessorPerformanceLevel : uint8
 UENUM(BlueprintType)
 enum class EOculusXRDeviceType : uint8
 {
-	//mobile HMDs
+	// mobile HMDs
 	OculusMobile_Deprecated0 = 0,
 	OculusQuest_Deprecated,
 	OculusQuest2,
 	MetaQuestPro,
 	MetaQuest3,
 
-	//PC HMDs
+	// PC HMDs
 	Rift = 100,
 	Rift_S,
 	Quest_Link_Deprecated,
@@ -180,7 +180,7 @@ enum class EOculusXRDeviceType : uint8
 	MetaQuestProLink,
 	MetaQuest3Link,
 
-	//default
+	// default
 	OculusUnknown = 200,
 };
 
@@ -203,10 +203,10 @@ enum class EOculusXRXrApi : uint8
 };
 
 /*
-* Information about relationships between a triggered boundary (EOculusXRBoundaryType::Boundary_Outer or
-* EOculusXRBoundaryType::Boundary_PlayArea) and a device or point in the world.
-* All dimensions, points, and vectors are returned in Unreal world coordinate space.
-*/
+ * Information about relationships between a triggered boundary (EOculusXRBoundaryType::Boundary_Outer or
+ * EOculusXRBoundaryType::Boundary_PlayArea) and a device or point in the world.
+ * All dimensions, points, and vectors are returned in Unreal world coordinate space.
+ */
 USTRUCT(BlueprintType)
 struct FOculusXRGuardianTestResult
 {

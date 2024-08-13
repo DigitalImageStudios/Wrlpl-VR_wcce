@@ -1,7 +1,5 @@
 ﻿// Copyright (c) Meta Platforms, Inc. and affiliates.
 
-#pragma once
-
 #include "OculusXRProjectSetupToolWidget.h"
 
 #include "DetailColumnSizeData.h"

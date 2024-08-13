@@ -10,9 +10,9 @@
 // FOculusXRSceneModule
 //-------------------------------------------------------------------------------------------------
 
-#if OCULUS_SCENE_SUPPORTED_PLATFORMS
-
 DECLARE_LOG_CATEGORY_EXTERN(LogOculusXRScene, Log, All);
+
+#if OCULUS_SCENE_SUPPORTED_PLATFORMS
 
 class FOculusXRSceneModule : public IOculusXRSceneModule
 {

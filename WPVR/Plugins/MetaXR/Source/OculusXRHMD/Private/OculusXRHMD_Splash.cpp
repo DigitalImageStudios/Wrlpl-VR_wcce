@@ -511,7 +511,7 @@ namespace OculusXRHMD
 			FSplashLayer& SplashLayer = SplashLayers[SplashLayerIndex];
 
 			//@DBG BEGIN
-			if (SplashLayer.Desc.LoadingTexture->IsValidLowLevel())
+			if (SplashLayer.Desc.LoadingTexture && SplashLayer.Desc.LoadingTexture->IsValidLowLevel())
 			{
 				if (SplashLayer.Desc.LoadingTexture->GetResource() && SplashLayer.Desc.LoadingTexture->GetResource()->TextureRHI)
 				{
@@ -532,7 +532,7 @@ namespace OculusXRHMD
 		}
 
 		{
-			//add oculus-generated layers through the OculusVR settings area
+			// add oculus-generated layers through the OculusVR settings area
 			FScopeLock ScopeLock(&RenderThreadLock);
 			Layers_RenderThread_DeltaRotation.Reset();
 			Layers_RenderThread_Input.Reset();
@@ -553,7 +553,7 @@ namespace OculusXRHMD
 				}
 			}
 
-			//add UE VR splash screen
+			// add UE VR splash screen
 			FOculusXRSplashDesc UESplashDesc = OculusXRHMD->GetUESplashScreenDesc();
 			if (UESplashDesc.LoadedTexture != nullptr)
 			{

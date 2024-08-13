@@ -722,13 +722,13 @@ namespace OculusXRInput
 								// Controller isn't available right now.
 								if (CVarOculusResetUntrackedInputStates.GetValueOnAnyThread())
 								{
-									//Zero out input state, so that if controller comes back it will send fresh event deltas
+									// Zero out input state, so that if controller comes back it will send fresh event deltas
 									State = FOculusTouchControllerState((EControllerHand)HandIndex);
 									UE_CLOG(OVR_DEBUG_LOGGING, LogOcInput, Log, TEXT("SendControllerEvents: Controller for the hand %d is not tracked and input states are reset"), int(HandIndex));
 								}
 								else
 								{
-									//Cache input state, so that if controller comes back it will send event deltas
+									// Cache input state, so that if controller comes back it will send event deltas
 									UE_CLOG(OVR_DEBUG_LOGGING, LogOcInput, Log, TEXT("SendControllerEvents: Controller for the hand %d is not tracked and input states are saved"), int(HandIndex));
 								}
 							}
@@ -876,13 +876,13 @@ namespace OculusXRInput
 								// Hand isn't available right now.
 								if (CVarOculusResetUntrackedInputStates.GetValueOnAnyThread())
 								{
-									//Zero out input state, so that if hand comes back it will send fresh event deltas
+									// Zero out input state, so that if hand comes back it will send fresh event deltas
 									State = FOculusHandControllerState((EControllerHand)HandIndex);
 									UE_CLOG(OVR_DEBUG_LOGGING, LogOcInput, Log, TEXT("SendControllerEvents: Hand for the hand %d is not tracked and input states are reset"), int32(HandIndex));
 								}
 								else
 								{
-									//Cache input state, so that if hand comes back it will send event deltas
+									// Cache input state, so that if hand comes back it will send event deltas
 									UE_CLOG(OVR_DEBUG_LOGGING, LogOcInput, Log, TEXT("SendControllerEvents: Hand for the hand %d is not tracked and input states are saved"), int(HandIndex));
 								}
 							}
@@ -1089,17 +1089,25 @@ namespace OculusXRInput
 		return DefaultName;
 	}
 
-	// Supported motion sources
-	const TMap<FName, ovrpNode> MotionSourceMap{
-		{ FName("Left"), ovrpNode_HandLeft },
-		{ FName("Right"), ovrpNode_HandRight },
-		{ FName("LeftGrip"), ovrpNode_HandLeft },
-		{ FName("RightGrip"), ovrpNode_HandRight },
-		{ FName("LeftAim"), ovrpNode_HandLeft },
-		{ FName("RightAim"), ovrpNode_HandRight },
+	struct MotionSourceInfo
+	{
+		ovrpNode Primary;
+		ovrpNode Fallback;
+	};
+
+	// Supported motion sources.
+	// When using both controllers and hand tracking, the 'ovrpNode_Hand(Left|Right)' controller transform is overwritten with the wrist transforms
+	// Check the controllers first, then fallback to the hands.
+	const TMap<FName, MotionSourceInfo> MotionSourceMap{
+		{ FName("Left"), { ovrpNode_ControllerLeft, ovrpNode_HandLeft } },
+		{ FName("Right"), { ovrpNode_ControllerRight, ovrpNode_HandRight } },
+		{ FName("LeftGrip"), { ovrpNode_HandLeft, ovrpNode_None } },
+		{ FName("RightGrip"), { ovrpNode_HandRight, ovrpNode_None } },
+		{ FName("LeftAim"), { ovrpNode_HandLeft, ovrpNode_None } },
+		{ FName("RightAim"), { ovrpNode_HandRight, ovrpNode_None } },
 		// Sometimes we can get an enum as the motion source name
-		{ FName("EControllerHand::Left"), ovrpNode_HandLeft },
-		{ FName("EControllerHand::Right"), ovrpNode_HandRight }
+		{ FName("EControllerHand::Left"), { ovrpNode_HandLeft, ovrpNode_None } },
+		{ FName("EControllerHand::Right"), { ovrpNode_HandRight, ovrpNode_None } },
 	};
 
 #if UE_VERSION_OLDER_THAN(5, 3, 0)
@@ -1190,11 +1198,27 @@ namespace OculusXRInput
 						if (IOculusXRHMDModule::IsAvailable() && FOculusXRHMDModule::GetPluginWrapper().GetInitialized())
 						{
 							OculusXRHMD::FOculusXRHMD* OculusXRHMD = static_cast<OculusXRHMD::FOculusXRHMD*>(GEngine->XRSystem->GetHMDDevice());
-							ovrpNode Node = MotionSourceMap[MotionSource];
+							const MotionSourceInfo& MotionInfo = MotionSourceMap[MotionSource];
+
+							ovrpNode Node = MotionInfo.Primary;
 
 							ovrpBool bResult = true;
 							bool bIsPositionValid = OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetNodePositionValid(Node, &bResult)) && bResult;
 							bool bIsOrientationValid = OVRP_SUCCESS(FOculusXRHMDModule::GetPluginWrapper().GetNodeOrientationValid(Node, &bResult)) && bResult;
+							if (!bIsPositionValid && !bIsOrientationValid && MotionInfo.Fallback != ovrpNode_None)
+							{
+								Node = MotionInfo.Fallback;
+								bResult = true;
+
+								bIsPositionValid =
+									OVRP_SUCCESS(
+										FOculusXRHMDModule::GetPluginWrapper().GetNodePositionValid(Node, &bResult))
+									&& bResult;
+								bIsOrientationValid =
+									OVRP_SUCCESS(
+										FOculusXRHMDModule::GetPluginWrapper().GetNodeOrientationValid(Node, &bResult))
+									&& bResult;
+							}
 
 							if (bIsPositionValid || bIsOrientationValid)
 							{
@@ -1430,7 +1454,7 @@ namespace OculusXRInput
 								WantToSend = FMath::Max(WantToSend, OvrpHapticsDesc.MinimumBufferSamplesCount);
 
 								ovrpUInt32 SamplesSent = 0;
-								if (OvrpHapticsState.SamplesQueued < OvrpHapticsDesc.MinimumSafeSamplesQueued + WantToSend) //trying to minimize latency
+								if (OvrpHapticsState.SamplesQueued < OvrpHapticsDesc.MinimumSafeSamplesQueued + WantToSend) // trying to minimize latency
 								{
 									WantToSend = (OvrpHapticsDesc.MinimumSafeSamplesQueued + WantToSend - OvrpHapticsState.SamplesQueued);
 									void* BufferToFree = nullptr;
@@ -1631,7 +1655,7 @@ namespace OculusXRInput
 
 		ovrpUInt32 SamplesSent = 0;
 		if (bPCM)
-		{ //PCM
+		{ // PCM
 			ovrpHapticsPcmVibration HapticsVibration;
 			HapticsVibration.Buffer = BufferToSend;
 			HapticsVibration.BufferSize = (ovrpUInt32)WantToSend;
@@ -1647,7 +1671,7 @@ namespace OculusXRInput
 				SamplesSent);
 		}
 		else
-		{ //HAE
+		{ // HAE
 			ovrpHapticsAmplitudeEnvelopeVibration HapticsVibration;
 			HapticsVibration.Duration = WantToSend / SampleRate;
 			HapticsVibration.AmplitudeCount = WantToSend;
@@ -1727,7 +1751,7 @@ namespace OculusXRInput
 
 			int32 SampleRate = HapticBuffer.SamplingRate;
 			int TargetFrequency = 320;
-			int TargetBufferSize = (HapticBuffer.BufferLength * TargetFrequency) / (SampleRate * 2) + 1; //2 because we're only using half of the 16bit source PCM buffer
+			int TargetBufferSize = (HapticBuffer.BufferLength * TargetFrequency) / (SampleRate * 2) + 1; // 2 because we're only using half of the 16bit source PCM buffer
 			ResampledHapticBuffer.BufferLength = TargetBufferSize;
 			ResampledHapticBuffer.CurrentPtr = 0;
 			ResampledHapticBuffer.SamplingRate = TargetFrequency;

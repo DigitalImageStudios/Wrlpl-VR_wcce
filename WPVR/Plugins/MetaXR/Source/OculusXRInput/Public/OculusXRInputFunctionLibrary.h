@@ -46,8 +46,8 @@ enum class EOculusXRFinger : uint8
 };
 
 /**
-* EOculusXRBone is enum representing the Bone Ids that come from the Oculus Runtime. 
-*/
+ * EOculusXRBone is enum representing the Bone Ids that come from the Oculus Runtime.
+ */
 UENUM(BlueprintType)
 enum class EOculusXRBone : uint8
 {
@@ -123,12 +123,12 @@ struct FOculusXRHapticsDesc
 };
 
 /**
-* FOculusXRCapsuleCollider is a struct that contains information on the physics/collider capsules created by the runtime for hands.
-*
-* @var Capsule		The UCapsuleComponent that is the collision capsule on the bone. Use this to register for overlap/collision events
-* @var BoneIndex	The Bone that this collision capsule is parented to. Corresponds to the EOculusXRBone enum.
-*
-*/
+ * FOculusXRCapsuleCollider is a struct that contains information on the physics/collider capsules created by the runtime for hands.
+ *
+ * @var Capsule		The UCapsuleComponent that is the collision capsule on the bone. Use this to register for overlap/collision events
+ * @var BoneIndex	The Bone that this collision capsule is parented to. Corresponds to the EOculusXRBone enum.
+ *
+ */
 USTRUCT(BlueprintType)
 struct OCULUSXRINPUT_API FOculusXRCapsuleCollider
 {
@@ -213,12 +213,12 @@ public:
 	static EOculusXRTrackingConfidence GetTrackingConfidence(const EOculusXRHandType DeviceHand, const int32 ControllerIndex = 0);
 
 	/**
-	* Get the tracking confidence of a finger
-	*
-	* @param DeviceHand				(in) The hand to get tracking confidence of
-	* @param ControllerIndex			(in) Optional different controller index
-	* @param Finger			(in) The finger to get tracking confidence of
-	*/
+	 * Get the tracking confidence of a finger
+	 *
+	 * @param DeviceHand				(in) The hand to get tracking confidence of
+	 * @param ControllerIndex			(in) Optional different controller index
+	 * @param Finger			(in) The finger to get tracking confidence of
+	 */
 	UFUNCTION(BlueprintPure, Category = "OculusLibrary|HandTracking")
 	static EOculusXRTrackingConfidence GetFingerTrackingConfidence(const EOculusXRHandType DeviceHand, const EOculusXRFinger Finger, const int32 ControllerIndex = 0);
 
@@ -246,11 +246,11 @@ public:
 	static bool IsHandTrackingEnabled();
 
 	/**
-	* Check if the hand position is valid
-	*
-	* @param DeviceHand				(in) The hand to get the position from
-	* @param ControllerIndex			(in) Optional different controller index
-	*/
+	 * Check if the hand position is valid
+	 *
+	 * @param DeviceHand				(in) The hand to get the position from
+	 * @param ControllerIndex			(in) Optional different controller index
+	 */
 	UFUNCTION(BlueprintPure, Category = "OculusLibrary|HandTracking")
 	static bool IsHandPositionValid(const EOculusXRHandType DeviceHand, const int32 ControllerIndex = 0);
 
@@ -347,4 +347,10 @@ public:
 	 */
 	UFUNCTION(BlueprintCallable, Category = "OculusLibrary|Controller")
 	static void SetControllerDrivenHandPoses(EOculusXRControllerDrivenHandPoseTypes Type);
+
+	/**
+	 * Get if / how controller inputs are used to build a syntheic hand pose.
+	 */
+	UFUNCTION(BlueprintPure, Category = "OculusLibrary|Controller")
+	static EOculusXRControllerDrivenHandPoseTypes GetControllerDrivenHandPoses();
 };

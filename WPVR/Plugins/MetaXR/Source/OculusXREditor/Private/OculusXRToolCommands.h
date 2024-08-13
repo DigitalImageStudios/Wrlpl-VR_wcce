@@ -14,8 +14,8 @@ class FOculusToolCommands : public TCommands<FOculusToolCommands>
 public:
 	FOculusToolCommands()
 		: TCommands<FOculusToolCommands>(
-			TEXT("OculusTool"), NSLOCTEXT("Contexts", "OculusXREditor", "OculusXREditor Plugin"), NAME_None,
-			FOculusToolStyle::GetStyleSetName())
+			  TEXT("OculusTool"), NSLOCTEXT("Contexts", "OculusXREditor", "OculusXREditor Plugin"), NAME_None,
+			  FOculusToolStyle::GetStyleSetName())
 		, ShowOculusToolCommand(
 			  TEXT("vr.oculus.ShowToolWindow"),
 			  *NSLOCTEXT("OculusRift", "CCommandText_ShowToolWindow",
@@ -36,6 +36,14 @@ public:
 	TSharedPtr<FUICommandInfo> LaunchGameRoom;
 	TSharedPtr<FUICommandInfo> LaunchLivingRoom;
 	TSharedPtr<FUICommandInfo> LaunchBedroom;
+	TSharedPtr<FUICommandInfo> Corridor;
+	TSharedPtr<FUICommandInfo> FurnitureFilledRoom;
+	TSharedPtr<FUICommandInfo> HighCeilingRoom;
+	TSharedPtr<FUICommandInfo> LivingRoomWithMultipleSpaces;
+	TSharedPtr<FUICommandInfo> LShapeRoom;
+	TSharedPtr<FUICommandInfo> Office;
+	TSharedPtr<FUICommandInfo> RoomWithStaircase;
+	TSharedPtr<FUICommandInfo> TrapezoidalRoom;
 	TSharedPtr<FUICommandInfo> StopServer;
 
 private:

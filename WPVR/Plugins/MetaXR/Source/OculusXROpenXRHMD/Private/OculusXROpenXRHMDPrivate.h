@@ -10,6 +10,9 @@
 #include "OpenXRCore.h"
 #endif
 
+#define ENSURE_XRCMD(cmd) \
+	OculusXR::CheckXrResult(cmd, #cmd);
+
 namespace OculusXR
 {
 	/** Check currently executing from Game thread */
@@ -42,7 +45,7 @@ namespace OculusXR
 #endif
 	}
 
-#if defined(WITH_OCULUS_BRANCH) && 0
+#if defined(WITH_OCULUS_BRANCH) && defined(WITH_OCULUS_OPENXR_NATIVE)
 	template <typename T>
 	static void XRGetInstanceProcAddr(XrInstance InInstance, const char* Name, T* Function)
 	{
@@ -82,5 +85,7 @@ namespace OculusXR
 		UE_LOG(LogHMD, Warning, TEXT("Unable to bind optional OpenXR entry %s."), ANSI_TO_TCHAR(Name));
 	}
 #endif
+
+	XrResult CheckXrResult(XrResult res, const char* cmd);
 
 } // namespace OculusXR

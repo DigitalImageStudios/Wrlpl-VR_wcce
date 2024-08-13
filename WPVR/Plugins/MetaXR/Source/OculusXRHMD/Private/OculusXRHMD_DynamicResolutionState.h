@@ -24,6 +24,9 @@ namespace OculusXRHMD
 		virtual void ResetHistory() override;
 		virtual bool IsSupported() const override;
 		virtual void SetupMainViewFamily(class FSceneViewFamily& ViewFamily) override;
+#if !UE_VERSION_OLDER_THAN(5, 4, 0)
+		virtual void SetTemporalUpscaler(const UE::Renderer::Private::ITemporalUpscaler* InTemporalUpscaler) override;
+#endif // !UE_VERSION_OLDER_THAN(5, 4, 0)
 
 	protected:
 		virtual DynamicRenderScaling::TMap<float> GetResolutionFractionsApproximation() const override;
@@ -40,4 +43,4 @@ namespace OculusXRHMD
 
 } // namespace OculusXRHMD
 
-#endif //OCULUS_HMD_SUPPORTED_PLATFORMS
+#endif // OCULUS_HMD_SUPPORTED_PLATFORMS

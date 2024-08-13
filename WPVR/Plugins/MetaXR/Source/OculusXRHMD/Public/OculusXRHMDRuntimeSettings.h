@@ -19,8 +19,8 @@ enum class EOculusXRSupportedDevices : uint8
 };
 
 /**
-* Implements the settings for the OculusVR plugin.
-*/
+ * Implements the settings for the OculusVR plugin.
+ */
 UCLASS(config = Engine, defaultconfig)
 class OCULUSXRHMD_API UOculusXRHMDRuntimeSettings : public UObject
 {
@@ -28,7 +28,7 @@ class OCULUSXRHMD_API UOculusXRHMDRuntimeSettings : public UObject
 
 public:
 	/** Configure System Splash Screen background type. To configure Splash Image go to Project Settings > Platforms > Android > Launch Image. */
-	UPROPERTY(config, EditAnywhere, Category = "System SplashScreen", meta = (DisplayName = "System Splash Screen Background"))
+	UPROPERTY(config, EditAnywhere, Category = "System SplashScreen", meta = (DisplayName = "System Splash Screen Background", EditCondition = "bInsightPassthroughEnabled"))
 	ESystemSplashBackgroundType SystemSplashBackground;
 
 	/** Whether the Splash screen is enabled. */
@@ -73,10 +73,17 @@ public:
 	FFilePath MetaXRJsonPath;
 
 	/**
-	In case of multiple players, when the primary player, which is connected to the HMD, is changed, this setting determins how to restore the previous player's head pose
+	In case of multiple players testing, when the primary player, which is connected to the HMD, is changed, this setting determins how to restore the previous player's head pose
 	*/
 	UPROPERTY(config, EditAnywhere, Category = PC, meta = (DisplayName = "MultiPlayer Pose Restore Type."))
 	EOculusXRMPPoseRestoreType MPPoseRestoreType;
+
+	/**
+	In case of multiple players testing, when the current player is inactive, disabling this setting will make sure the current player does NOT update headpose until it is active again.
+	This setting is not limited to multiple players testing and it will be applied to any VRPreview PIE window.
+	*/
+	UPROPERTY(config, EditAnywhere, Category = PC, meta = (DisplayName = "Enable head pose update for inactive VRPreview player."))
+	bool bUpdateHeadPoseForInactivePlayer;
 
 	/** Maximum allowed pixel density. */
 	UPROPERTY(config, EditAnywhere, Category = "Mobile|Dynamic Resolution", DisplayName = "Enable Dynamic Resolution")
@@ -172,11 +179,25 @@ public:
 	bool bSceneSupportEnabled;
 
 
+	/** Can boundary visibility be toggled in app */
+	UPROPERTY(config, EditAnywhere, Category = Mobile, meta = (DisplayName = "Boundary Visibility Support"))
+	bool bBoundaryVisibilitySupportEnabled;
+
+	/** Should the guardian boundary visibility be suppressed by default */
+	UPROPERTY(config, EditAnywhere, Category = Mobile, meta = (DisplayName = "Default Is Boundary Visibility Suppressed"))
+	bool bDefaultBoundaryVisibilitySuppressed;
 
 	/** Whether body tracking functionality can be used with the app */
 	UPROPERTY(config, EditAnywhere, Category = Mobile, meta = (DisplayName = "Body Tracking Enabled", EditCondition = "XrApi == EOculusXRXrApi::OVRPluginOpenXR"))
 	bool bBodyTrackingEnabled;
 
+	/** Select a Body Tracking Fidelity */
+	UPROPERTY(config, EditAnywhere, Category = Mobile, meta = (DisplayName = "Body Tracking Fidelity", EditCondition = "XrApi == EOculusXRXrApi::OVRPluginOpenXR"))
+	EOculusXRHMDBodyTrackingFidelity BodyTrackingFidelity;
+
+	/** Select a Body Tracking joint set */
+	UPROPERTY(config, EditAnywhere, Category = Mobile, meta = (DisplayName = "Body Tracking Joint Set", EditCondition = "XrApi == EOculusXRXrApi::OVRPluginOpenXR"))
+	EOculusXRHMDBodyJointSet BodyTrackingJointSet;
 
 	/** Whether eye tracking functionality can be used with the app */
 	UPROPERTY(config, EditAnywhere, Category = Mobile, meta = (DisplayName = "Eye Tracking Enabled", EditCondition = "XrApi == EOculusXRXrApi::OVRPluginOpenXR"))

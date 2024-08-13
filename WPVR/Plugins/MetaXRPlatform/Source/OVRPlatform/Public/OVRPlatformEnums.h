@@ -29,6 +29,7 @@
 #include "OVR_AccountAgeCategory.h"
 #include "OVR_AchievementType.h"
 #include "OVR_AppAgeCategory.h"
+#include "OVR_AppInstallResult.h"
 #include "OVR_AppStatus.h"
 #include "OVR_ChallengeCreationType.h"
 #include "OVR_ChallengeViewerFilter.h"
@@ -81,13 +82,16 @@ enum class EOvrAbuseReportType : uint8
 ovrAbuseReportType ConvertAbuseReportType(EOvrAbuseReportType Value);
 EOvrAbuseReportType ConvertAbuseReportType(ovrAbuseReportType Value);
 
-/** AccountAgeCategory enumeration. */
+/** Age category in Meta account. The values are used in UserAgeCategory_Get() API. */
 UENUM(BlueprintType)
 enum class EOvrAccountAgeCategory : uint8
 {
     Unknown,
+    /** Child age group for users between the ages of 10-12 (age may vary by region) */
     Ch,
+    /** Teenage age group for users between the ages of 13-17 (age may vary by region) */
     Tn,
+    /** Adult age group for users ages 18 and up (age may vary by region) */
     Ad,
 };
 
@@ -107,29 +111,72 @@ enum class EOvrAchievementType : uint8
 ovrAchievementType ConvertAchievementType(EOvrAchievementType Value);
 EOvrAchievementType ConvertAchievementType(ovrAchievementType Value);
 
-/** AppAgeCategory enumeration. */
+/** Age category for developers to send to Meta. The values are used in UserAgeCategory_Report() API. */
 UENUM(BlueprintType)
 enum class EOvrAppAgeCategory : uint8
 {
     Unknown,
+    /** Child age group for users between the ages of 10-12 (age may vary by region) */
     Ch,
+    /** Non-child age group for users ages 13 and up (age may vary by region) */
     Nch,
 };
 
 ovrAppAgeCategory ConvertAppAgeCategory(EOvrAppAgeCategory Value);
 EOvrAppAgeCategory ConvertAppAgeCategory(ovrAppAgeCategory Value);
 
-/** AppStatus enumeration. */
+/**
+ * Result of installing an app. In case of an error during install process,
+ * the error message contains the string representation of this result. This is
+ * returned from Application_StartAppDownload(), Application_CancelAppDownload() and Application_InstallAppUpdateAndRelaunch() APIs.
+ */
+UENUM(BlueprintType)
+enum class EOvrAppInstallResult : uint8
+{
+    Unknown,
+    /** Install of the app failed due to low storage on the device */
+    LowStorage,
+    /** Install of the app failed due to a network error */
+    NetworkError,
+    /**
+     * Install of the app failed as another install request for this application
+     * is already being processed by the installer
+     */
+    DuplicateRequest,
+    /** Install of the app failed due to an internal installer error */
+    InstallerError,
+    /** Install of the app failed because the user cancelled the install operation */
+    UserCancelled,
+    /** Install of the app failed due to a user authorization error */
+    AuthorizationError,
+    /** Install of the app succeeded */
+    Success,
+};
+
+ovrAppInstallResult ConvertAppInstallResult(EOvrAppInstallResult Value);
+EOvrAppInstallResult ConvertAppInstallResult(ovrAppInstallResult Value);
+
+/**
+ * Current status of the app on the device. An app can only check
+ * its own status.
+ */
 UENUM(BlueprintType)
 enum class EOvrAppStatus : uint8
 {
     Unknown,
+    /** User has valid entitlement to the app but it is not currently installed on the device. */
     Entitled,
+    /** Download of the app is currently queued. */
     DownloadQueued,
+    /** Download of the app is currently in progress. */
     Downloading,
+    /** Install of the app is currently in progress. */
     Installing,
+    /** App is installed on the device. */
     Installed,
+    /** App is being uninstalled from the device. */
     Uninstalling,
+    /** Install of the app is currently queued. */
     InstallQueued,
 };
 
@@ -212,9 +259,20 @@ UENUM(BlueprintType)
 enum class EOvrLaunchType : uint8
 {
     Unknown,
+    /**  Normal launch from the user's library  */
     Normal,
+    /**
+     *  Launch from the user accepting an invite.  Check field FOvrLaunchDetails::LobbySessionID,
+     *     field FOvrLaunchDetails::MatchSessionID, field FOvrLaunchDetails::DestinationApiName and
+     *     field FOvrLaunchDetails::DeeplinkMessage. 
+     */
     Invite,
+    /**  DEPRECATED  */
     Coordinated,
+    /**
+     *  Launched from Application_LaunchOtherApp().
+     *     Check field FOvrLaunchDetails::LaunchSource and field FOvrLaunchDetails::DeeplinkMessage. 
+     */
     Deeplink,
 };
 
@@ -487,13 +545,16 @@ enum class EOvrPlatformInitializeResult : uint8
 ovrPlatformInitializeResult ConvertPlatformInitializeResult(EOvrPlatformInitializeResult Value);
 EOvrPlatformInitializeResult ConvertPlatformInitializeResult(ovrPlatformInitializeResult Value);
 
-/** ReportRequestResponse enumeration. */
+/** Possible states that an app can respond to the platform notification that the in-app reporting flow has been requested by the user. */
 UENUM(BlueprintType)
 enum class EOvrReportRequestResponse : uint8
 {
     Unknown,
+    /** Response to the platform notification that the in-app reporting flow request is handled. */
     Handled,
+    /** Response to the platform notification that the in-app reporting flow request is not handled. */
     Unhandled,
+    /** Response to the platform notification that the in-app reporting flow is unavailable or non-existent. */
     Unavailable,
 };
 

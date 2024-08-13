@@ -4,6 +4,7 @@
 #include "OculusXRHMDModule.h"
 #include "OculusXRTelemetryPrivacySettings.h"
 #include "Async/Async.h"
+#include "GeneralProjectSettings.h"
 
 namespace OculusXRTelemetry
 {
@@ -44,7 +45,14 @@ namespace OculusXRTelemetry
 		if (FOculusXRHMDModule::Get().IsOVRPluginAvailable() && FOculusXRHMDModule::GetPluginWrapper().IsInitialized())
 		{
 			FOculusXRHMDModule::GetPluginWrapper().QplSetConsent(HasConsent);
+			FOculusXRHMDModule::GetPluginWrapper().SetDeveloperTelemetryConsent(HasConsent);
 		}
 #endif
+	}
+
+	FString GetProjectId()
+	{
+		const UGeneralProjectSettings& ProjectSettings = *GetDefault<UGeneralProjectSettings>();
+		return ProjectSettings.ProjectID.ToString();
 	}
 } // namespace OculusXRTelemetry

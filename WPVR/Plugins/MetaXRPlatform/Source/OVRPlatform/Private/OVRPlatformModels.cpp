@@ -263,11 +263,13 @@ FOvrAppDownloadResult::FOvrAppDownloadResult(ovrAppDownloadResultHandle OvrHandl
 
 void FOvrAppDownloadResult::Clear()
 {
+    AppInstallResult = EOvrAppInstallResult::Unknown;
     Timestamp = 0;
 }
 
 void FOvrAppDownloadResult::Update(ovrAppDownloadResultHandle OvrHandle, TOvrMessageHandlePtr MessageHandlePtr)
 {
+    AppInstallResult = ConvertAppInstallResult(ovr_AppDownloadResult_GetAppInstallResult(OvrHandle));
     Timestamp = static_cast<int64>(ovr_AppDownloadResult_GetTimestamp(OvrHandle));
 }
 

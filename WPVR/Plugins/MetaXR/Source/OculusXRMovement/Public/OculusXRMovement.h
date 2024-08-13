@@ -23,6 +23,8 @@ struct OCULUSXRMOVEMENT_API OculusXRMovement
 	static bool RequestBodyTrackingFidelity(EOculusXRBodyTrackingFidelity fidelity);
 	static bool ResetBodyTrackingCalibration();
 	static bool SuggestBodyTrackingCalibrationOverride(float height);
+	static bool GetBodySkeleton(FOculusXRBodySkeleton& outOculusXRBodyState, float WorldToMeters = 100.0f);
+
 private:
 	static bool IsFullBodyTrackingEnabled();
 

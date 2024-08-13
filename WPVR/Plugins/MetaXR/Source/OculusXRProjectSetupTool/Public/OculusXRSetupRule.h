@@ -35,7 +35,7 @@ enum class ESetupRuleSeverity : uint8
 UENUM()
 enum class ESetupRulePlatform : uint32
 {
-	//None
+	// None
 	None = 0,
 	// Link
 	MetaLink = 0x1 UMETA(DisplayName = "Link"),

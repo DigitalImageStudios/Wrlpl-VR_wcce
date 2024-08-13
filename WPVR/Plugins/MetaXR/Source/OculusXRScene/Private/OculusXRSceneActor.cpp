@@ -654,7 +654,7 @@ bool AOculusXRSceneActor::CheckFloorBounds(FOculusXRUInt64 AnchorHandle, FOculus
 	GetSemanticClassifications(AnchorHandle, semanticClassifications);
 	if (!semanticClassifications.Contains("FLOOR"))
 	{
-		UE_LOG(LogOculusXRScene, Error, TEXT("Queried floor in room doesn't contain a floor semantic label. UUID (%s), Room Space ID (%llu)"), *UUID.ToString(), RoomAnchorHandle);
+		UE_LOG(LogOculusXRScene, Error, TEXT("Queried floor in room doesn't contain a floor semantic label. UUID (%s), Room Space ID (%llu)"), *UUID.ToString(), RoomAnchorHandle.GetValue());
 		return false;
 	}
 
@@ -662,7 +662,7 @@ bool AOculusXRSceneActor::CheckFloorBounds(FOculusXRUInt64 AnchorHandle, FOculus
 	TArray<FVector2f> boundaryVertices;
 	if (!OculusXRAnchors::FOculusXRAnchors::GetSpaceBoundary2D(AnchorHandle, boundaryVertices, getBoundaryResult))
 	{
-		UE_LOG(LogOculusXRScene, Error, TEXT("Failed to get space boundary vertices for floor. UUID (%s), Room Space ID (%llu)"), *UUID.ToString(), RoomAnchorHandle);
+		UE_LOG(LogOculusXRScene, Error, TEXT("Failed to get space boundary vertices for floor. UUID (%s), Room Space ID (%llu)"), *UUID.ToString(), RoomAnchorHandle.GetValue());
 		return false;
 	}
 
@@ -677,7 +677,7 @@ bool AOculusXRSceneActor::CheckFloorBounds(FOculusXRUInt64 AnchorHandle, FOculus
 	FTransform floorTransform;
 	if (!UOculusXRAnchorBPFunctionLibrary::GetAnchorTransformByHandle(AnchorHandle, floorTransform))
 	{
-		UE_LOG(LogOculusXRScene, Error, TEXT("Failed to get the floor anchor transform. Floor Space ID (%llu)"), AnchorHandle);
+		UE_LOG(LogOculusXRScene, Error, TEXT("Failed to get the floor anchor transform. Floor Space ID (%llu)"), AnchorHandle.GetValue());
 		return false;
 	}
 
@@ -698,7 +698,7 @@ bool AOculusXRSceneActor::CheckFloorBounds(FOculusXRUInt64 AnchorHandle, FOculus
 	// Check if inside poly
 	if (!PointInPolygon2D(FVector2f(headPose.Position.X, headPose.Position.Y), new2DBoundary))
 	{
-		UE_LOG(LogOculusXRScene, Verbose, TEXT("Floor failed active room check. UUID (%s), Room Space ID (%llu)"), *UUID.ToString(), RoomAnchorHandle);
+		UE_LOG(LogOculusXRScene, Verbose, TEXT("Floor failed active room check. UUID (%s), Room Space ID (%llu)"), *UUID.ToString(), RoomAnchorHandle.GetValue());
 		return false;
 	}
 

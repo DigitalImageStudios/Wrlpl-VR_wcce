@@ -4,6 +4,7 @@
 #include "OculusXRPassthroughLayerComponent.h"
 
 #include "Engine/StaticMesh.h"
+#include "Engine/GameEngine.h"
 #include "Components/StaticMeshComponent.h"
 #include "ProceduralMeshComponent.h"
 #include "OculusXRHMD.h"
@@ -34,7 +35,7 @@ void UOculusXRStereoLayerShapeReconstructed::ApplyShape(IStereoLayers::FLayerDes
 
 void UOculusXRStereoLayerShapeUserDefined::ApplyShape(IStereoLayers::FLayerDesc& LayerDesc)
 {
-	//If there is no user geometry, set the layer hidden to avoid unnecessary cost
+	// If there is no user geometry, set the layer hidden to avoid unnecessary cost
 	if (UserGeometryList.IsEmpty())
 		LayerDesc.Flags |= IStereoLayers::LAYER_FLAG_HIDDEN;
 
@@ -146,7 +147,7 @@ OculusXRHMD::FOculusPassthroughMeshRef UOculusXRPassthroughLayerComponent::Creat
 	TArray<int32> Triangles;
 	TArray<FVector> Vertices;
 	int32 NumSections = ProceduralMeshComponent->GetNumSections();
-	int VertexOffset = 0; //Each section start with vertex IDs of 0, in order to create a single mesh from all sections we need to offset those IDs by the amount of previous vertices
+	int VertexOffset = 0; // Each section start with vertex IDs of 0, in order to create a single mesh from all sections we need to offset those IDs by the amount of previous vertices
 	for (int32 s = 0; s < NumSections; ++s)
 	{
 		FProcMeshSection* ProcMeshSection = ProceduralMeshComponent->GetProcMeshSection(s);
@@ -322,14 +323,15 @@ bool UOculusXRPassthroughLayerComponent::CanEditChange(const FProperty* InProper
 	if (!Super::CanEditChange(InProperty))
 		return false;
 
-	if (!(Shape && Shape.IsA(UOculusXRPassthroughLayerBase::StaticClass())))
-	{
-		return true;
-	}
-
 	const FName PropertyName = InProperty->GetFName();
 	if (PropertyName == GET_MEMBER_NAME_CHECKED(UOculusXRPassthroughLayerComponent, Texture)
+		|| PropertyName == GET_MEMBER_NAME_CHECKED(UOculusXRPassthroughLayerComponent, LeftTexture)
+		|| PropertyName == GET_MEMBER_NAME_CHECKED(UOculusXRPassthroughLayerComponent, bLiveTexture)
+		|| PropertyName == GET_MEMBER_NAME_CHECKED(UOculusXRPassthroughLayerComponent, bNoAlphaChannel)
 		|| PropertyName == GET_MEMBER_NAME_CHECKED(UOculusXRPassthroughLayerComponent, bQuadPreserveTextureRatio)
+#ifdef WITH_OCULUS_BRANCH
+		|| PropertyName == GET_MEMBER_NAME_CHECKED(UOculusXRPassthroughLayerComponent, bBicubicFiltering)
+#endif
 		|| PropertyName == GET_MEMBER_NAME_CHECKED(UOculusXRPassthroughLayerComponent, QuadSize)
 		|| PropertyName == GET_MEMBER_NAME_CHECKED(UOculusXRPassthroughLayerComponent, UVRect)
 		|| PropertyName == GET_MEMBER_NAME_CHECKED(UOculusXRPassthroughLayerComponent, StereoLayerType))

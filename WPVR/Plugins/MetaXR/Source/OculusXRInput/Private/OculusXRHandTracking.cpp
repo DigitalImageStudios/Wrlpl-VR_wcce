@@ -2,22 +2,23 @@
 // Copyright Epic Games, Inc. All Rights Reserved.
 
 #include "OculusXRHandTracking.h"
-#include "OculusXRHMD.h"
-#include "Misc/CoreDelegates.h"
-#include "IOculusXRInputModule.h"
 
 #include "Animation/Skeleton.h"
 #include "BoneWeights.h"
 #include "Components/SkeletalMeshComponent.h"
-#include "Rendering/SkeletalMeshLODRenderData.h"
-#include "Rendering/SkeletalMeshRenderData.h"
+#include "Engine/SkinnedAssetCommon.h"
 #include "Rendering/SkeletalMeshLODModel.h"
+#include "Rendering/SkeletalMeshLODRenderData.h"
 #include "Rendering/SkeletalMeshModel.h"
+#include "Rendering/SkeletalMeshRenderData.h"
+#include "IOculusXRInputModule.h"
+#include "MaterialDomain.h"
 #include "Materials/Material.h"
 #include "Materials/MaterialInstanceDynamic.h"
-#include "Engine/SkinnedAssetCommon.h"
+#include "Misc/CoreDelegates.h"
 #include "Model.h"
-#include "MaterialDomain.h"
+#include "OculusXRHMD.h"
+#include "OculusXRInputState.h"
 
 #define OCULUS_TO_UE4_SCALE 100.0f
 

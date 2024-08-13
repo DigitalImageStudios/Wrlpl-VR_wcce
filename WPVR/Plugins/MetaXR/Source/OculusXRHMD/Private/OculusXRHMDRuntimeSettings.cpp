@@ -45,9 +45,13 @@ UOculusXRHMDRuntimeSettings::UOculusXRHMDRuntimeSettings(const FObjectInitialize
 	bAnchorSharingEnabled = DefaultSettings.Flags.bAnchorSharingEnabled;
 	bSceneSupportEnabled = DefaultSettings.Flags.bSceneSupportEnabled;
 	bIterativeCookOnTheFly = DefaultSettings.Flags.bIterativeCookOnTheFly;
+	bBoundaryVisibilitySupportEnabled = DefaultSettings.Flags.bBoundaryVisibilitySupportEnabled;
+	bDefaultBoundaryVisibilitySuppressed = DefaultSettings.Flags.bDefaultBoundaryVisibilitySuppressed;
 	ProcessorFavor = DefaultSettings.ProcessorFavor;
 	bTileTurnOffEnabled = DefaultSettings.Flags.bTileTurnOffEnabled;
 
+	BodyTrackingFidelity = DefaultSettings.BodyTrackingFidelity;
+	BodyTrackingJointSet = DefaultSettings.BodyTrackingJointSet;
 
 	FaceTrackingDataSource.Empty(static_cast<int8>(EFaceTrackingDataSourceConfig::MAX));
 	FaceTrackingDataSource.Append(DefaultSettings.FaceTrackingDataSource);
@@ -89,7 +93,10 @@ UOculusXRHMDRuntimeSettings::UOculusXRHMDRuntimeSettings(const FObjectInitialize
 	bAnchorSharingEnabled = false;
 	bSceneSupportEnabled = false;
 	MPPoseRestoreType = EOculusXRMPPoseRestoreType::None;
+	bUpdateHeadPoseForInactivePlayer = false;
 	bIterativeCookOnTheFly = false;
+	bBoundaryVisibilitySupportEnabled = false;
+	bDefaultBoundaryVisibilitySuppressed = false;
 	ProcessorFavor = EProcessorFavor::FavorEqually;
 	bTileTurnOffEnabled = false;
 #endif
@@ -164,6 +171,12 @@ void UOculusXRHMDRuntimeSettings::PostEditChangeProperty(struct FPropertyChanged
 					SupportedDevices.Last() = deviceList[deviceList.Num() - 1];
 				}
 			}
+		}
+
+		if (PropertyChangedEvent.Property->GetFName() == GET_MEMBER_NAME_CHECKED(UOculusXRHMDRuntimeSettings, bInsightPassthroughEnabled))
+		{
+			SystemSplashBackground = bInsightPassthroughEnabled ? ESystemSplashBackgroundType::Contextual : ESystemSplashBackgroundType::Black;
+			UpdateSinglePropertyInConfigFile(GetClass()->FindPropertyByName(GET_MEMBER_NAME_CHECKED(UOculusXRHMDRuntimeSettings, SystemSplashBackground)), GetDefaultConfigFilename());
 		}
 	}
 }

@@ -33,7 +33,7 @@ public:
 	bool bEnableEdgeColor = false;
 
 	/** Color of the passthrough edge rendering effect. */
-	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Passthrough Properties")
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = "Passthrough Properties", meta = (EditCondition = "bEnableEdgeColor", EditConditionHides))
 	FLinearColor EdgeColor;
 
 	/** Enable color mapping */
@@ -138,24 +138,24 @@ public:
 	void SetLayerPlacement(EOculusXRPassthroughLayerOrder InLayerOrder);
 
 	/**
-	* Sets Color LUT source.
-	* If ColorMapType is "Color LUT", then source will be blended with passthrough
-	* using folowing formula:
-	* Result = ColorLUTSource * LutWeight + Passthrough * (1 - LutWeight )
-	* If ColorMapType is "Interpolated Color LUT", then source will be blended with color LUT target
-	* using folowing formula:
-	* Result = ColorLUTSource * (  1 - LutWeight ) + ColorLUTTarget * LutWeight
-	*/
+	 * Sets Color LUT source.
+	 * If ColorMapType is "Color LUT", then source will be blended with passthrough
+	 * using folowing formula:
+	 * Result = ColorLUTSource * LutWeight + Passthrough * (1 - LutWeight )
+	 * If ColorMapType is "Interpolated Color LUT", then source will be blended with color LUT target
+	 * using folowing formula:
+	 * Result = ColorLUTSource * (  1 - LutWeight ) + ColorLUTTarget * LutWeight
+	 */
 	UFUNCTION(BlueprintCallable, Category = "Components|Stereo Layer")
 	void SetColorLUTSource(class UOculusXRPassthroughColorLut* InColorLUTSource);
 
 	/**
-	* Sets Color LUT target.
-	* If ColorMapType is "Interpolated Color LUT", then target will be blended with passthrough
-	* using folowing formula:
-	* Result = ColorLUTSource * (  1 - LutWeight ) + ColorLUTTarget * LutWeight
-	* Note: If ColorLUTSource is not specified, Color LUT will be not be applied to the Passthrough layer.
-	*/
+	 * Sets Color LUT target.
+	 * If ColorMapType is "Interpolated Color LUT", then target will be blended with passthrough
+	 * using folowing formula:
+	 * Result = ColorLUTSource * (  1 - LutWeight ) + ColorLUTTarget * LutWeight
+	 * Note: If ColorLUTSource is not specified, Color LUT will be not be applied to the Passthrough layer.
+	 */
 	UFUNCTION(BlueprintCallable, Category = "Components|Stereo Layer")
 	void SetColorLUTTarget(class UOculusXRPassthroughColorLut* InColorLUTTarget);
 

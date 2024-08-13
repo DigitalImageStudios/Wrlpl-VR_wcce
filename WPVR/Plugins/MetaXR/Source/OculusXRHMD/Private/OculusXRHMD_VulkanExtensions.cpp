@@ -17,7 +17,7 @@ namespace OculusXRHMD
 	bool FVulkanExtensions::GetVulkanInstanceExtensionsRequired(TArray<const ANSICHAR*>& Out)
 	{
 #if OCULUS_HMD_SUPPORTED_PLATFORMS_VULKAN
-		//TArray<VkExtensionProperties> Properties = GetIVulkanDynamicRHI()->RHIGetAllInstanceExtensions();
+		// TArray<VkExtensionProperties> Properties = GetIVulkanDynamicRHI()->RHIGetAllInstanceExtensions();
 
 		TArray<const char*> Extensions;
 		{
@@ -52,7 +52,7 @@ namespace OculusXRHMD
 	bool FVulkanExtensions::GetVulkanDeviceExtensionsRequired(struct VkPhysicalDevice_T* pPhysicalDevice, TArray<const ANSICHAR*>& Out)
 	{
 #if OCULUS_HMD_SUPPORTED_PLATFORMS_VULKAN
-		//TArray<VkExtensionProperties> Properties = GetIVulkanDynamicRHI()->RHIGetAllDeviceExtensions((VkPhysicalDevice)pPhysicalDevice);
+		// TArray<VkExtensionProperties> Properties = GetIVulkanDynamicRHI()->RHIGetAllDeviceExtensions((VkPhysicalDevice)pPhysicalDevice);
 
 		TArray<const char*> Extensions;
 		{
@@ -117,4 +117,4 @@ namespace OculusXRHMD
 
 } // namespace OculusXRHMD
 
-#endif //OCULUS_HMD_SUPPORTED_PLATFORMS
+#endif // OCULUS_HMD_SUPPORTED_PLATFORMS

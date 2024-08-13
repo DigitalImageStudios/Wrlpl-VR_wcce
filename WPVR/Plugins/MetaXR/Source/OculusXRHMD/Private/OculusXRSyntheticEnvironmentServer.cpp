@@ -3,6 +3,7 @@
 
 #include "OculusXRSyntheticEnvironmentServer.h"
 #if PLATFORM_WINDOWS
+#include "HAL/FileManager.h"
 #include "OculusXRHMDRuntimeSettings.h"
 #include "OculusXRTelemetryEvents.h"
 #include "Misc/MessageDialog.h"
@@ -23,6 +24,18 @@ void FMetaXRSES::StopServer()
 
 void FMetaXRSES::LaunchEnvironment(FString EnvironmentName)
 {
+	FString SESPath = GetSynthEnvServerPath();
+	LaunchEnvironment(EnvironmentName, SESPath);
+}
+
+void FMetaXRSES::LaunchMoreRoomsEnvironment(FString EnvironmentName)
+{
+	FString SESPath = GetSynthEnvServerPath();
+	LaunchEnvironment(EnvironmentName, FMetaXRSES::GetSynthEnvServerMoreRoomsPath());
+}
+
+void FMetaXRSES::LaunchEnvironment(FString EnvironmentName, FString SESPath)
+{
 	if (GetMetaXRSimPackagePath().IsEmpty())
 	{
 		return;
@@ -30,7 +43,6 @@ void FMetaXRSES::LaunchEnvironment(FString EnvironmentName)
 	StopServer();
 
 	OculusXRTelemetry::TScopedMarker<OculusXRTelemetry::Events::FSimulator> Event;
-	FString SESPath = GetSynthEnvServerPath();
 	const bool bLaunched = LaunchProcess(SESPath, EnvironmentName, LocalSharingServer, EnvProcHandle);
 	const auto& _ = Event.SetResult(bLaunched ? OculusXRTelemetry::EAction::Success : OculusXRTelemetry::EAction::Fail).AddAnnotation("launch", StringCast<ANSICHAR>(*EnvironmentName).Get());
 
@@ -99,6 +111,11 @@ FString FMetaXRSES::GetMetaXRSimPackagePath()
 FString FMetaXRSES::GetSynthEnvServerPath()
 {
 	return GetMetaXRSimPackagePath() + "/.synth_env_server/synth_env_server.exe";
+}
+
+FString FMetaXRSES::GetSynthEnvServerMoreRoomsPath()
+{
+	return GetMetaXRSimPackagePath() + "/ses_rooms~/synth_env_server_extra_rooms.exe";
 }
 
 FString FMetaXRSES::GetLocalSharingServerPath()

@@ -4,6 +4,8 @@
 #include "OculusXRBuildAnalytics.h"
 #include "GameProjectGenerationModule.h"
 #include "OculusXRHMDModule.h"
+#include "OculusXRHMDRuntimeSettings.h"
+#include "OculusXRTelemetryPrivacySettings.h"
 #include "Runtime/Core/Public/HAL/FileManager.h"
 
 FOculusBuildAnalytics* FOculusBuildAnalytics::instance = 0;
@@ -33,10 +35,9 @@ void FOculusBuildAnalytics::Shutdown()
 FOculusBuildAnalytics::FOculusBuildAnalytics()
 {
 	bool TelemetryEnabled = false;
-	if (!GConfig->GetBool(TEXT("/Script/OculusXREditor.OculusXREditorSettings"), TEXT("bEnableOculusBuildTelemetry"), TelemetryEnabled, GEditorIni))
+	if (const auto EditorPrivacySettings = GetDefault<UOculusXRTelemetryPrivacySettings>())
 	{
-		GConfig->SetBool(TEXT("/Script/OculusXREditor.OculusXREditorSettings"), TEXT("bEnableOculusBuildTelemetry"), TelemetryEnabled, GEditorIni);
-		GConfig->Flush(0);
+		TelemetryEnabled = EditorPrivacySettings->bIsEnabled;
 	}
 
 	if (TelemetryEnabled)
@@ -75,6 +76,11 @@ void FOculusBuildAnalytics::OnLauncherCreated(ILauncherRef Launcher)
 
 void FOculusBuildAnalytics::OnLauncherWorkerStarted(ILauncherWorkerPtr LauncherWorker, ILauncherProfileRef Profile)
 {
+	bool isUsingIterativeCotf = GetMutableDefault<UOculusXRHMDRuntimeSettings>()->bIterativeCookOnTheFly;
+	FOculusXRHMDModule::GetPluginWrapper().SetDeveloperMode(true);
+	FOculusXRHMDModule::GetPluginWrapper().SendEvent2(
+		"build_start_is_iterative_cotf", isUsingIterativeCotf ? "1" : "0", "ovrbuild");
+
 	TArray<FString> Platforms = Profile.Get().GetCookedPlatforms();
 	if (Platforms.Num() == 1)
 	{
@@ -87,9 +93,6 @@ void FOculusBuildAnalytics::OnLauncherWorkerStarted(ILauncherWorkerPtr LauncherW
 			CurrentBuildPlatform = Platforms[0];
 			TotalBuildTime = 0;
 			BuildStepCount = 0;
-
-			FOculusXRHMDModule::GetPluginWrapper().SetDeveloperMode(true);
-
 			OutputDirectory = Profile.Get().GetPackageDirectory();
 
 			// Assign callbacks for stages

@@ -79,7 +79,9 @@ public:
 
 private:
 
-    bool bOculusInit;
+    // Whether this instance of subsystem being initiated is the first one in multiplayer context
+    static bool bFirstInstanceInit;
+    bool bOculusInit = false;
 
 #if PLATFORM_WINDOWS
     bool InitWithWindowsPlatform();
@@ -318,7 +320,7 @@ private: // Notification delegate handles and handlers
 private: // Message pump.
 
     // The message pump need to be explicity started with StartMessagePump()
-    bool bMessagePumpActivated;
+    bool bMessagePumpActivated = false;
 
     virtual void Tick(float DeltaTime) override;
     virtual bool IsTickable() const override;

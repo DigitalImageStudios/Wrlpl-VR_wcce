@@ -3,6 +3,7 @@
 
 #include "OculusXRSimulator.h"
 #if PLATFORM_WINDOWS
+#include "HAL/FileManager.h"
 #include "OculusXRHMDRuntimeSettings.h"
 #include "OculusXRTelemetryEvents.h"
 #include "Misc/MessageDialog.h"
@@ -35,7 +36,7 @@ void FMetaXRSimulator::ToggleOpenXRRuntime()
 
 	if (IsSimulatorActivated())
 	{
-		//Deactivate MetaXR Simulator
+		// Deactivate MetaXR Simulator
 		FString PrevOpenXrRuntimeEnvKey = FWindowsPlatformMisc::GetEnvironmentVariable(*PreviousOpenXrRuntimeEnvKey);
 
 		FWindowsPlatformMisc::SetEnvironmentVar(*PreviousOpenXrRuntimeEnvKey,
@@ -47,7 +48,7 @@ void FMetaXRSimulator::ToggleOpenXRRuntime()
 	}
 	else
 	{
-		//Activate MetaXR Simulator
+		// Activate MetaXR Simulator
 		FString CurOpenXrRuntimeEnvKey = FWindowsPlatformMisc::GetEnvironmentVariable(*OpenXrRuntimeEnvKey);
 
 		FWindowsPlatformMisc::SetEnvironmentVar(*PreviousOpenXrRuntimeEnvKey,

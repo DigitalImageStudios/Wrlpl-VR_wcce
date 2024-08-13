@@ -8,6 +8,7 @@
 #include "OculusXRAnchorDelegates.h"
 #include "OculusXRHMDModule.h"
 #include "OculusXRAnchorManager.h"
+#include "OculusXRAnchorsModule.h"
 #include "OculusXRSpatialAnchorComponent.h"
 #include "OculusXRAnchorBPFunctionLibrary.h"
 #include "OculusXRTelemetryAnchorsEvents.h"
@@ -432,6 +433,31 @@ namespace OculusXRAnchors
 			UE_LOG(LogOculusXRAnchors, Warning, TEXT("Failed to start async call to query anchors."));
 			ResultCallback.ExecuteIfBound(EOculusXRAnchorResult::Failure, TArray<FOculusXRSpaceQueryResult>());
 			Trace.SetResult(OculusXRTelemetry::EAction::Cancel).End();
+		}
+
+		return bAsyncStartSuccess;
+	}
+
+	bool FOculusXRAnchors::ShareAnchors(const TArray<uint64>& AnchorHandles, const TArray<uint64>& OculusUserIDs, const FOculusXRAnchorShareDelegate& ResultCallback, EOculusXRAnchorResult::Type& OutResult)
+	{
+		uint64 RequestId = 0;
+		OutResult = FOculusXRAnchorManager::ShareSpaces(AnchorHandles, OculusUserIDs, RequestId);
+		bool bAsyncStartSuccess = UOculusXRAnchorBPFunctionLibrary::IsAnchorResultSuccess(OutResult);
+
+		if (bAsyncStartSuccess)
+		{
+			ShareAnchorsBinding ShareAnchorsData;
+			ShareAnchorsData.RequestId = RequestId;
+			ShareAnchorsData.Binding = ResultCallback;
+			ShareAnchorsData.OculusUserIds = OculusUserIDs;
+
+			FOculusXRAnchors* SDKInstance = GetInstance();
+			SDKInstance->ShareAnchorsBindings.Add(RequestId, ShareAnchorsData);
+		}
+		else
+		{
+			UE_LOG(LogOculusXRAnchors, Warning, TEXT("Failed to start async call to share anchor."));
+			ResultCallback.ExecuteIfBound(EOculusXRAnchorResult::Failure, TArray<UOculusXRAnchorComponent*>(), TArray<uint64>());
 		}
 
 		return bAsyncStartSuccess;

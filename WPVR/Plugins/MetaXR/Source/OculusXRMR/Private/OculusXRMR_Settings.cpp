@@ -69,7 +69,7 @@ void UOculusXRMR_Settings::LoadFromIni()
 
 	// Flushing the GEngineIni is necessary to get the settings reloaded at the runtime, but the manual flushing
 	// could cause an assert when loading audio settings if launching through editor at the 2nd time. Disabled temporarily.
-	//GConfig->Flush(true, GEngineIni);
+	// GConfig->Flush(true, GEngineIni);
 
 	const TCHAR* OculusXRMRSettings = TEXT("Oculus.Settings.MixedReality");
 	bool v;
