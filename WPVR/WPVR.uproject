@@ -62,10 +62,6 @@
 			"Enabled": false
 		},
 		{
-			"Name": "ElectraPlayer",
-			"Enabled": true
-		},
-		{
 			"Name": "OpenXR",
 			"Enabled": true,
 			"SupportedTargetPlatforms": [
@@ -99,6 +95,10 @@
 		{
 			"Name": "GoogleCloudMessaging",
 			"Enabled": false
+		},
+		{
+			"Name": "ElectraPlayer",
+			"Enabled": true
 		}
 	]
 }
